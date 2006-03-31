@@ -7,6 +7,7 @@ import java.util.Date;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
+import org.apache.struts.validator.DynaValidatorForm;
 
 /**
  * @author <a href="chrisvanlith@b3partners.nl">Chris van Lith</a>
@@ -47,7 +48,7 @@ public final class FormUtils {
         }
         return soughtDate;
     }
-
+    
     public static Date FormStringToDate(String thisdate, Locale locale) {
         if (thisdate==null || thisdate.trim().length()==0)
             return null;
@@ -71,23 +72,23 @@ public final class FormUtils {
         String newdate = theDay + "-" + theMonth + "-" + theYear;
         return newdate;
     }
-
+    
     public static String reformatDateBigDecimal(BigDecimal thisdate) {
         if (thisdate==null)
             return null;
         return reformatDateString(Integer.toString(thisdate.intValue()));
     }
-
+    
     public static Date reformatBigDecimalToDate(BigDecimal thisdate) {
         if (thisdate==null)
             return null;
         return FormStringToDate(reformatDateString(Integer.toString(thisdate.intValue())), null);
     }
-
+    
     public static Date SortStringToDate(String thisdate, Locale locale) {
         return StringToDate(reformatDateString(thisdate), locale);
     }
-
+    
     public static Date StringToTimestamp(String ts) {
         if (ts==null || ts.trim().length()==0)
             return null;
@@ -101,7 +102,7 @@ public final class FormUtils {
         }
         return soughtDate;
     }
-
+    
     public static String DateToString(Date thisdate, Locale locale) {
         if (thisdate!=null) {
             SimpleDateFormat sdf = (SimpleDateFormat) SimpleDateFormat.getDateInstance();
@@ -119,7 +120,7 @@ public final class FormUtils {
         } else
             return "";
     }
-
+    
     public static String TimestampToString(Date thisdate) {
         if (thisdate!=null) {
             SimpleDateFormat sdf = (SimpleDateFormat) SimpleDateFormat.getDateInstance();
@@ -128,7 +129,7 @@ public final class FormUtils {
         } else
             return "";
     }
-
+    
     public static String DateToSortString(Date thisdate, Locale locale) {
         if (thisdate!=null) {
             SimpleDateFormat sdf = (SimpleDateFormat) SimpleDateFormat.getDateInstance();
@@ -157,7 +158,7 @@ public final class FormUtils {
             return null;
         }
     }
-
+    
     public static Short StringToShort(String thisstring) {
         try {
             return new Short(thisstring);
@@ -172,7 +173,7 @@ public final class FormUtils {
         else
             return thisint.toString();
     }
-
+    
     public static String ShortToString(Short thisshort) {
         if (thisshort==null)
             return "";
@@ -227,7 +228,7 @@ public final class FormUtils {
         } else {
             return format.format(d.doubleValue());
         }
-    }    
+    }
     
     /**
      * Formatteert d volgens format
@@ -249,12 +250,12 @@ public final class FormUtils {
     }
     
     /**
-     * Parst s volgens format. 
+     * Parst s volgens format.
      */
     public static double parseDouble(String s, NumberFormat format) throws ParseException {
         return format.parse(s).doubleValue();
     }
-
+    
     /**
      * Formatteert bd volgens format. Geeft lege String indien bd null is.
      */
@@ -264,7 +265,7 @@ public final class FormUtils {
         } else {
             return format.format(bd.doubleValue());
         }
-    }    
+    }
     
     /**
      * Parst s volgens format. Returnt null indien s null is of een lege string.
@@ -406,4 +407,28 @@ public final class FormUtils {
         BigDecimal result = val.multiply(bdFactor);
         return result.setScale(scale, BigDecimal.ROUND_HALF_UP);
     }
+    
+    /**
+     * gemaksfunctie die test of een string niet null of leeg is.
+     * @param astr te testen string
+     * @return true indien leeg of null
+     */
+    public static boolean nullOrEmpty(String astr) {
+        return (astr == null || astr.length()==0);
+    }
+    
+    public static String[] getStringArray(DynaValidatorForm dynaform, String param) {
+        return (String[]) dynaform.get(param);
+    }
+    
+    public static int getInteger(DynaValidatorForm dynaform, String param) {
+        Integer i = (Integer) dynaform.get(param);
+        return i!=null? i.intValue() : -1;
+    }
+    
+    public static boolean getBoolean(DynaValidatorForm dynaform, String param) {
+        Boolean bo = (Boolean) dynaform.get(param);
+        return bo!=null && bo.booleanValue()? true : false;
+    }
+    
 }

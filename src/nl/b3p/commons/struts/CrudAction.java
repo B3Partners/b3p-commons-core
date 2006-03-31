@@ -119,31 +119,37 @@ public class CrudAction extends MethodPropertiesAction {
     
     public ActionForward unspecified(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
         prepareMethod(form, request, EDIT, LIST);
+        addDefaultMessage(mapping, request);
         return mapping.findForward(SUCCESS);
     }
     
     public ActionForward deleteConfirm(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
         prepareMethod(form, request, DELETE, EDIT);
+        addDefaultMessage(mapping, request);
         return getDefaultForward(mapping, request);
     }
     
     public ActionForward saveConfirm(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
         prepareMethod(form, request, SAVE, EDIT);
+        addDefaultMessage(mapping, request);
         return getDefaultForward(mapping, request);
     }
     
     public ActionForward edit(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
         prepareMethod(form, request, EDIT, LIST);
+        addDefaultMessage(mapping, request);
         return getDefaultForward(mapping, request);
     }
     
     public ActionForward list(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
         prepareMethod(form, request, LIST, EDIT);
+        addDefaultMessage(mapping, request);
         return getDefaultForward(mapping, request);
     }
     
     public ActionForward save(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
         prepareMethod(form, request, LIST, EDIT);
+        addDefaultMessage(mapping, request);
         return getDefaultForward(mapping, request);
     }
     
@@ -152,6 +158,7 @@ public class CrudAction extends MethodPropertiesAction {
         DynaValidatorForm dynaForm = (DynaValidatorForm)form;
         dynaForm.initialize(mapping);
         prepareMethod(form, request, LIST, EDIT);
+        addDefaultMessage(mapping, request);
         return getDefaultForward(mapping, request);
     }
     
@@ -161,6 +168,7 @@ public class CrudAction extends MethodPropertiesAction {
         DynaValidatorForm dynaForm = (DynaValidatorForm)form;
         dynaForm.initialize(mapping);
         prepareMethod(form, request, EDIT, LIST);
+        addDefaultMessage(mapping, request);
         return getDefaultForward(mapping, request);
     }
     
@@ -192,12 +200,23 @@ public class CrudAction extends MethodPropertiesAction {
         return dispatchMethod(mapping, form, request, response, methodName);
     }
     
-    protected ActionForward getAlternateForward(ActionMapping mapping, HttpServletRequest request, String causeKey) {
-        return getAlternateForward(mapping, request, causeKey, null);
+    protected void addDefaultMessage(ActionMapping mapping, HttpServletRequest request) {
+        String defaultMessagekey = null;
+        
+        CrudActionProperties props = (CrudActionProperties)getMethodProperties(request);
+        if (props != null) {
+            defaultMessagekey = props.getDefaultMessageKey();
+        }
+        
+        if(defaultMessagekey != null)
+            addMessage(request, defaultMessagekey);
     }
     
-    protected ActionForward getAlternateForward(ActionMapping mapping, HttpServletRequest request, String causeKey, String cause) {
-        
+    protected void addAlternateMessage(ActionMapping mapping, HttpServletRequest request, String causeKey) {
+        addAlternateMessage(mapping, request, causeKey, null);
+    }
+    
+    protected void addAlternateMessage(ActionMapping mapping, HttpServletRequest request, String causeKey, String cause) {
         if (cause == null) {
             MessageResources messages = getResources(request);
             Locale locale = getLocale(request);
@@ -205,11 +224,9 @@ public class CrudAction extends MethodPropertiesAction {
         }
         
         String alternateMessagekey = null;
-        ActionForward alternateForward = null;
         
         CrudActionProperties props = (CrudActionProperties)getMethodProperties(request);
         if(props != null) {
-            alternateForward = mapping.findForward(props.getAlternateForwardName());
             alternateMessagekey = props.getAlternateMessageKey();
         }
         
@@ -218,6 +235,16 @@ public class CrudAction extends MethodPropertiesAction {
         else
             addMessage(request, GENERAL_ERROR_KEY, cause);
         
+    }
+    
+    protected ActionForward getAlternateForward(ActionMapping mapping, HttpServletRequest request) {
+        String alternateMessagekey = null;
+        ActionForward alternateForward = null;
+        
+        CrudActionProperties props = (CrudActionProperties)getMethodProperties(request);
+        if(props != null) {
+            alternateForward = mapping.findForward(props.getAlternateForwardName());
+        }
         if (alternateForward != null)
             return alternateForward;
         
@@ -225,17 +252,12 @@ public class CrudAction extends MethodPropertiesAction {
     }
     
     protected ActionForward getDefaultForward(ActionMapping mapping, HttpServletRequest request) {
-        String defaultMessagekey = null;
         ActionForward defaultForward = null;
         
         CrudActionProperties props = (CrudActionProperties)getMethodProperties(request);
         if (props != null) {
             defaultForward = mapping.findForward(props.getDefaultForwardName());
-            defaultMessagekey = props.getDefaultMessageKey();
         }
-        
-        if(defaultMessagekey != null)
-            addMessage(request, defaultMessagekey);
         
         if (defaultForward != null)
             return defaultForward;
