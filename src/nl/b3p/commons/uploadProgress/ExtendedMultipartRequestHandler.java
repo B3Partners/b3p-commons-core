@@ -83,7 +83,7 @@ public class ExtendedMultipartRequestHandler implements MultipartRequestHandler 
 	 * Commons Logging instance.
 	 */
 	protected static Log log = LogFactory.getLog(
-			CommonsMultipartRequestHandler.class);
+			ExtendedMultipartRequestHandler.class);
 	
 	
 	/**

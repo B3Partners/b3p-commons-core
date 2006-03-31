@@ -55,19 +55,16 @@ public class CrudAction extends MethodPropertiesAction {
         CrudActionProperties crudProp = null;
         
         crudProp = new CrudActionProperties(CONFIRM);
-        crudProp.setDefaultForwardField(DEFAULT_FORWARDFIELD); // Redispatch
         map.put(CONFIRM, crudProp);
         
         crudProp = new CrudActionProperties(DELETE_CONFIRM);
         crudProp.setDefaultForwardName(SUCCESS);
         crudProp.setDefaultMessageKey("warning.crud.delete");
-        crudProp.setAlternateForwardField(ALTERNATE_FORWARDFIELD); // Redispatch bij cancel
         map.put(DELETE_CONFIRM, crudProp);
         
         crudProp = new CrudActionProperties(SAVE_CONFIRM);
         crudProp.setDefaultForwardName(SUCCESS); // Na saveConfirm forward naar success
         crudProp.setDefaultMessageKey("warning.crud.save");
-        crudProp.setAlternateForwardField(ALTERNATE_FORWARDFIELD); // Redispatch bij cancel
         map.put(SAVE_CONFIRM, crudProp);
         
         crudProp = new CrudActionProperties(DELETE);
@@ -75,13 +72,11 @@ public class CrudAction extends MethodPropertiesAction {
         crudProp.setDefaultMessageKey("warning.crud.deletedone");
         crudProp.setAlternateForwardName(FAILURE);
         crudProp.setAlternateMessageKey("error.crud.deletefailed");
-        crudProp.setAlternateForwardField(ALTERNATE_FORWARDFIELD); // Redispatch bij cancel
         map.put(DELETE, crudProp);
         
         crudProp = new CrudActionProperties(CREATE);
         crudProp.setDefaultForwardName(SUCCESS);
         crudProp.setAlternateForwardName(LISTFW);
-        crudProp.setAlternateForwardField(ALTERNATE_FORWARDFIELD); // Redispatch bij cancel
         map.put(CREATE, crudProp);
         
         crudProp = new CrudActionProperties(SAVE);
@@ -89,19 +84,16 @@ public class CrudAction extends MethodPropertiesAction {
         crudProp.setDefaultMessageKey("warning.crud.savedone");
         crudProp.setAlternateForwardName(FAILURE);
         crudProp.setAlternateMessageKey("error.crud.savefailed");
-        crudProp.setAlternateForwardField(ALTERNATE_FORWARDFIELD); // Redispatch bij cancel
         map.put(SAVE, crudProp);
         
         crudProp = new CrudActionProperties(EDIT);
         crudProp.setDefaultForwardName(SUCCESS);
         crudProp.setAlternateForwardName(LISTFW);
-        crudProp.setAlternateForwardField(ALTERNATE_FORWARDFIELD); // Redispatch bij cancel
         map.put(EDIT, crudProp);
         
         crudProp = new CrudActionProperties(LIST);
         crudProp.setDefaultForwardName(LISTFW);
         crudProp.setAlternateForwardName(FAILURE);
-        crudProp.setAlternateForwardField(ALTERNATE_FORWARDFIELD); // Redispatch bij cancel
         map.put(LIST, crudProp);
         
         return map;
@@ -173,17 +165,7 @@ public class CrudAction extends MethodPropertiesAction {
     }
     
     public ActionForward confirm(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        String defaultForwardField = null;
-        String defaultMessagekey = null;
-        CrudActionProperties props = (CrudActionProperties)getMethodProperties(request);
-        if(props != null) {
-            defaultForwardField = props.getDefaultForwardField();
-            defaultMessagekey = props.getDefaultMessageKey();
-        }
-        if(defaultMessagekey != null) {
-            addMessage(request, defaultMessagekey);
-        }
-        return redispatchFormField(mapping, form, request, response, defaultForwardField);
+        return redispatchFormField(mapping, form, request, response, DEFAULT_FORWARDFIELD);
     }
     
     public ActionForward cancelled(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
