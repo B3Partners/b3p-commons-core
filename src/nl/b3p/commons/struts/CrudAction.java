@@ -106,7 +106,10 @@ public class CrudAction extends MethodPropertiesAction {
     }
     
     protected ActionForward getUnspecifiedAlternateForward(ActionMapping mapping, HttpServletRequest request) {
-        return mapping.findForward(FAILURE);
+        ActionForward af = mapping.getInputForward();
+        if (af!=null)
+            return af;
+        return getUnspecifiedDefaultForward(mapping, request);
     }
     
     protected void prepareMethod(ActionForm form, HttpServletRequest request, String def, String alt) throws Exception {
