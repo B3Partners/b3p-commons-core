@@ -35,15 +35,6 @@ public class UploadListener implements OutputStreamListener
     {
         totalBytesRead = totalBytesRead + bytesRead;
         updateUploadInfo("progress");
-
-        try
-        {
-            Thread.sleep(delay);
-        }
-        catch (InterruptedException e)
-        {
-            e.printStackTrace();
-        }
     }
 
     public void error(String message)
