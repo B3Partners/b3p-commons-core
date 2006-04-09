@@ -65,7 +65,7 @@ public abstract class MethodPropertiesAction extends ParameterLookupDispatchActi
 		messages.add(ActionMessages.GLOBAL_MESSAGE, message);
 		saveMessages(request, messages);		
 	}
-
+        
 	protected void addMessage(HttpServletRequest request, String resourceKey) {
 		addMessage(request, new ActionMessage(resourceKey));
 	}
