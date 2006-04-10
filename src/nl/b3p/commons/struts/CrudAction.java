@@ -193,13 +193,7 @@ public class CrudAction extends MethodPropertiesAction {
     }
     
     public ActionForward redispatch(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response, String methodParameter) throws Exception {
-        String methodName = null;
-        if(methodParameter != null) {
-            methodName = (String)parameterMethodMap.get(methodParameter);
-        }
-        request.setAttribute(DISPATCHED_PARAMETER, methodParameter);
-        request.setAttribute(DISPATCHED_METHOD_NAME, methodName);
-        
+        String methodName = setDispatchMethod(methodParameter, request);
         return dispatchMethod(mapping, form, request, response, methodName);
     }
     
