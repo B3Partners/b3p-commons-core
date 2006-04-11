@@ -8,8 +8,6 @@ import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.util.MessageResources;
@@ -30,18 +28,17 @@ public abstract class ExtendedMethodAction extends MethodPropertiesAction {
         return getUnspecifiedDefaultForward(mapping, request);
     }
     
-    public ActionForward redispatchFormField(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response, String formfield) throws Exception {
+    public ActionForward redispatchFormField(ActionMapping mapping, DynaValidatorForm dynaForm, HttpServletRequest request, HttpServletResponse response, String formfield) throws Exception {
         String methodParameter = null;
         if (formfield!=null) {
-            DynaValidatorForm dynaForm = (DynaValidatorForm)form;
             methodParameter = (String)dynaForm.get(formfield);
         }
-        return redispatch(mapping, form, request, response, methodParameter);
+        return redispatch(mapping, dynaForm, request, response, methodParameter);
     }
     
-    public ActionForward redispatch(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response, String methodParameter) throws Exception {
+    public ActionForward redispatch(ActionMapping mapping, DynaValidatorForm dynaForm, HttpServletRequest request, HttpServletResponse response, String methodParameter) throws Exception {
         String methodName = setDispatchMethod(methodParameter, request);
-        return dispatchMethod(mapping, form, request, response, methodName);
+        return dispatchMethod(mapping, dynaForm, request, response, methodName);
     }
     
     protected void addDefaultMessage(ActionMapping mapping, HttpServletRequest request) {

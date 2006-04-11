@@ -5,7 +5,6 @@
 package nl.b3p.commons.struts;
 
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,7 +16,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.apache.struts.util.MessageResources;
 import org.apache.struts.validator.DynaValidatorForm;
 
 public class CrudAction extends ExtendedMethodAction {
@@ -101,75 +99,72 @@ public class CrudAction extends ExtendedMethodAction {
         return mapping.findForward(SUCCESS);
     }
     
-    protected void prepareMethod(ActionForm form, HttpServletRequest request, String def, String alt) throws Exception {
+    protected void prepareMethod(DynaValidatorForm dynaForm, HttpServletRequest request, String def, String alt) throws Exception {
         // nieuwe default actie zetten
-        DynaValidatorForm dynaForm = (DynaValidatorForm)form;
         dynaForm.set(DEFAULT_FORWARDFIELD, def);
         dynaForm.set(ALTERNATE_FORWARDFIELD, alt);
         createLists(dynaForm, request);
     }
     
-    public ActionForward unspecified(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        prepareMethod(form, request, EDIT, LIST);
+    public ActionForward unspecified(ActionMapping mapping, DynaValidatorForm dynaForm, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        prepareMethod(dynaForm, request, EDIT, LIST);
         addDefaultMessage(mapping, request);
         return mapping.findForward(SUCCESS);
     }
     
-    public ActionForward deleteConfirm(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        prepareMethod(form, request, DELETE, EDIT);
+    public ActionForward deleteConfirm(ActionMapping mapping, DynaValidatorForm dynaForm, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        prepareMethod(dynaForm, request, DELETE, EDIT);
         addDefaultMessage(mapping, request);
         return getDefaultForward(mapping, request);
     }
     
-    public ActionForward saveConfirm(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        prepareMethod(form, request, SAVE, EDIT);
+    public ActionForward saveConfirm(ActionMapping mapping, DynaValidatorForm dynaForm, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        prepareMethod(dynaForm, request, SAVE, EDIT);
         addDefaultMessage(mapping, request);
         return getDefaultForward(mapping, request);
     }
     
-    public ActionForward edit(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        prepareMethod(form, request, EDIT, LIST);
+    public ActionForward edit(ActionMapping mapping, DynaValidatorForm dynaForm, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        prepareMethod(dynaForm, request, EDIT, LIST);
         addDefaultMessage(mapping, request);
         return getDefaultForward(mapping, request);
     }
     
-    public ActionForward list(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        prepareMethod(form, request, LIST, EDIT);
+    public ActionForward list(ActionMapping mapping, DynaValidatorForm dynaForm, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        prepareMethod(dynaForm, request, LIST, EDIT);
         addDefaultMessage(mapping, request);
         return getDefaultForward(mapping, request);
     }
     
-    public ActionForward save(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        prepareMethod(form, request, LIST, EDIT);
+    public ActionForward save(ActionMapping mapping, DynaValidatorForm dynaForm, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        prepareMethod(dynaForm, request, LIST, EDIT);
         addDefaultMessage(mapping, request);
         return getDefaultForward(mapping, request);
     }
     
-    public ActionForward delete(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public ActionForward delete(ActionMapping mapping, DynaValidatorForm dynaForm, HttpServletRequest request, HttpServletResponse response) throws Exception {
         // nieuwe default actie op delete zetten
-        DynaValidatorForm dynaForm = (DynaValidatorForm)form;
-        dynaForm.initialize(mapping);
-        prepareMethod(form, request, LIST, EDIT);
+         dynaForm.initialize(mapping);
+        prepareMethod(dynaForm, request, LIST, EDIT);
         addDefaultMessage(mapping, request);
         return getDefaultForward(mapping, request);
     }
     
-    public ActionForward create(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public ActionForward create(ActionMapping mapping, DynaValidatorForm dynaForm, HttpServletRequest request, HttpServletResponse response) throws Exception {
         
         // nieuwe default actie op delete zetten
-        DynaValidatorForm dynaForm = (DynaValidatorForm)form;
         dynaForm.initialize(mapping);
-        prepareMethod(form, request, EDIT, LIST);
+        prepareMethod(dynaForm, request, EDIT, LIST);
         addDefaultMessage(mapping, request);
         return getDefaultForward(mapping, request);
     }
     
-    public ActionForward confirm(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        return redispatchFormField(mapping, form, request, response, DEFAULT_FORWARDFIELD);
+    public ActionForward confirm(ActionMapping mapping, DynaValidatorForm dynaForm, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        return redispatchFormField(mapping, dynaForm, request, response, DEFAULT_FORWARDFIELD);
     }
     
-    public ActionForward cancelled(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        return redispatchFormField(mapping, form, request, response, ALTERNATE_FORWARDFIELD);
+    public ActionForward cancelled(ActionMapping mapping, DynaValidatorForm dynaForm, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        return redispatchFormField(mapping, dynaForm, request, response, ALTERNATE_FORWARDFIELD);
     }
     
     public ActionForward execute(ActionMapping mapping, ActionForm  form,
