@@ -20,7 +20,7 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.util.MessageResources;
 import org.apache.struts.validator.DynaValidatorForm;
 
-public class CrudAction extends MethodPropertiesAction {
+public class CrudAction extends ExtendedMethodAction {
     
     private static final Log log = LogFactory.getLog(CrudAction.class);
     
@@ -45,53 +45,49 @@ public class CrudAction extends MethodPropertiesAction {
     protected static final String EDIT = "edit";
     protected static final String LIST = "list";
     
-    protected Class getActionMethodPropertiesClass() {
-        return CrudActionProperties.class;
-    }
-    
     protected Map getActionMethodPropertiesMap() {
         Map map = new HashMap();
         
-        CrudActionProperties crudProp = null;
+        ExtendedMethodProperties crudProp = null;
         
-        crudProp = new CrudActionProperties(CONFIRM);
+        crudProp = new ExtendedMethodProperties(CONFIRM);
         map.put(CONFIRM, crudProp);
         
-        crudProp = new CrudActionProperties(DELETE_CONFIRM);
+        crudProp = new ExtendedMethodProperties(DELETE_CONFIRM);
         crudProp.setDefaultForwardName(SUCCESS);
         crudProp.setDefaultMessageKey("warning.crud.delete");
         map.put(DELETE_CONFIRM, crudProp);
         
-        crudProp = new CrudActionProperties(SAVE_CONFIRM);
+        crudProp = new ExtendedMethodProperties(SAVE_CONFIRM);
         crudProp.setDefaultForwardName(SUCCESS); // Na saveConfirm forward naar success
         crudProp.setDefaultMessageKey("warning.crud.save");
         map.put(SAVE_CONFIRM, crudProp);
         
-        crudProp = new CrudActionProperties(DELETE);
+        crudProp = new ExtendedMethodProperties(DELETE);
         crudProp.setDefaultForwardName(LISTFW);
         crudProp.setDefaultMessageKey("warning.crud.deletedone");
         crudProp.setAlternateForwardName(FAILURE);
         crudProp.setAlternateMessageKey("error.crud.deletefailed");
         map.put(DELETE, crudProp);
         
-        crudProp = new CrudActionProperties(CREATE);
+        crudProp = new ExtendedMethodProperties(CREATE);
         crudProp.setDefaultForwardName(SUCCESS);
         crudProp.setAlternateForwardName(LISTFW);
         map.put(CREATE, crudProp);
         
-        crudProp = new CrudActionProperties(SAVE);
+        crudProp = new ExtendedMethodProperties(SAVE);
         crudProp.setDefaultForwardName(SUCCESS);
         crudProp.setDefaultMessageKey("warning.crud.savedone");
         crudProp.setAlternateForwardName(FAILURE);
         crudProp.setAlternateMessageKey("error.crud.savefailed");
         map.put(SAVE, crudProp);
         
-        crudProp = new CrudActionProperties(EDIT);
+        crudProp = new ExtendedMethodProperties(EDIT);
         crudProp.setDefaultForwardName(SUCCESS);
         crudProp.setAlternateForwardName(LISTFW);
         map.put(EDIT, crudProp);
         
-        crudProp = new CrudActionProperties(LIST);
+        crudProp = new ExtendedMethodProperties(LIST);
         crudProp.setDefaultForwardName(LISTFW);
         crudProp.setAlternateForwardName(FAILURE);
         map.put(LIST, crudProp);
@@ -103,13 +99,6 @@ public class CrudAction extends MethodPropertiesAction {
     
     protected ActionForward getUnspecifiedDefaultForward(ActionMapping mapping, HttpServletRequest request) {
         return mapping.findForward(SUCCESS);
-    }
-    
-    protected ActionForward getUnspecifiedAlternateForward(ActionMapping mapping, HttpServletRequest request) {
-        ActionForward af = mapping.getInputForward();
-        if (af!=null)
-            return af;
-        return getUnspecifiedDefaultForward(mapping, request);
     }
     
     protected void prepareMethod(ActionForm form, HttpServletRequest request, String def, String alt) throws Exception {
@@ -181,85 +170,6 @@ public class CrudAction extends MethodPropertiesAction {
     
     public ActionForward cancelled(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
         return redispatchFormField(mapping, form, request, response, ALTERNATE_FORWARDFIELD);
-    }
-    
-    public ActionForward redispatchFormField(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response, String formfield) throws Exception {
-        String methodParameter = null;
-        if (formfield!=null) {
-            DynaValidatorForm dynaForm = (DynaValidatorForm)form;
-            methodParameter = (String)dynaForm.get(formfield);
-        }
-        return redispatch(mapping, form, request, response, methodParameter);
-    }
-    
-    public ActionForward redispatch(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response, String methodParameter) throws Exception {
-        String methodName = setDispatchMethod(methodParameter, request);
-        return dispatchMethod(mapping, form, request, response, methodName);
-    }
-    
-    protected void addDefaultMessage(ActionMapping mapping, HttpServletRequest request) {
-        String defaultMessagekey = null;
-        
-        CrudActionProperties props = (CrudActionProperties)getMethodProperties(request);
-        if (props != null) {
-            defaultMessagekey = props.getDefaultMessageKey();
-        }
-        
-        if(defaultMessagekey != null)
-            addMessage(request, defaultMessagekey);
-    }
-    
-    protected void addAlternateMessage(ActionMapping mapping, HttpServletRequest request, String causeKey) {
-        addAlternateMessage(mapping, request, causeKey, null);
-    }
-    
-    protected void addAlternateMessage(ActionMapping mapping, HttpServletRequest request, String causeKey, String cause) {
-        if (cause == null) {
-            MessageResources messages = getResources(request);
-            Locale locale = getLocale(request);
-            cause = messages.getMessage(locale, causeKey);
-        }
-        
-        String alternateMessagekey = null;
-        
-        CrudActionProperties props = (CrudActionProperties)getMethodProperties(request);
-        if(props != null) {
-            alternateMessagekey = props.getAlternateMessageKey();
-        }
-        
-        if(alternateMessagekey != null)
-            addMessage(request, alternateMessagekey, cause);
-        else
-            addMessage(request, GENERAL_ERROR_KEY, cause);
-        
-    }
-    
-    protected ActionForward getAlternateForward(ActionMapping mapping, HttpServletRequest request) {
-        String alternateMessagekey = null;
-        ActionForward alternateForward = null;
-        
-        CrudActionProperties props = (CrudActionProperties)getMethodProperties(request);
-        if(props != null) {
-            alternateForward = mapping.findForward(props.getAlternateForwardName());
-        }
-        if (alternateForward != null)
-            return alternateForward;
-        
-        return getUnspecifiedAlternateForward(mapping, request);
-    }
-    
-    protected ActionForward getDefaultForward(ActionMapping mapping, HttpServletRequest request) {
-        ActionForward defaultForward = null;
-        
-        CrudActionProperties props = (CrudActionProperties)getMethodProperties(request);
-        if (props != null) {
-            defaultForward = mapping.findForward(props.getDefaultForwardName());
-        }
-        
-        if (defaultForward != null)
-            return defaultForward;
-        
-        return getUnspecifiedDefaultForward(mapping, request);
     }
     
     public ActionForward execute(ActionMapping mapping, ActionForm  form,

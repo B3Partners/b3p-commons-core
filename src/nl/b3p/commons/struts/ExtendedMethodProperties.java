@@ -1,10 +1,10 @@
 /*
- * $Id: CrudActionProperties.java 2771 2006-03-28 13:29:24Z Chris $
+ * $Id: ExtendedMethodProperties.java 2771 2006-03-28 13:29:24Z Chris $
  */
 
 package nl.b3p.commons.struts;
 
-public class CrudActionProperties extends ActionMethodProperties {
+public class ExtendedMethodProperties extends ActionMethodProperties {
     /*
      * Het blokje default heeft betrekking op de normale afloop van
      * een actie, bv OK actie.
@@ -25,11 +25,11 @@ public class CrudActionProperties extends ActionMethodProperties {
     private String alternateForwardName = null;
     private String alternateMessageKey = null;
     
-    public CrudActionProperties(String methodName) {
+    public ExtendedMethodProperties(String methodName) {
         super(methodName);
     }
     
-    public CrudActionProperties(String methodName,
+    public ExtendedMethodProperties(String methodName,
             String defaultForwardName,
             String alternateForwardName) {
         super(methodName);
@@ -37,7 +37,7 @@ public class CrudActionProperties extends ActionMethodProperties {
         this.setAlternateForwardName(alternateForwardName);
     }
     
-    public CrudActionProperties(String methodName,
+    public ExtendedMethodProperties(String methodName,
             String defaultForwardName,
             String alternateForwardName,
             String defaultMessageKey,
