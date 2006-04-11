@@ -81,7 +81,7 @@ import org.apache.struts.actions.DispatchAction;
  * </pre>
  * </code>
  */
-public abstract class ParameterLookupDispatchAction extends DispatchAction {
+public abstract class ParameterLookupDispatchAction extends DynaFormDispatchAction {
     
     private static final String DISPATCHED_PARAMETER = ParameterLookupDispatchAction.class.getName() + ".DISPATCHED_PARAMETER";
     private static final String DISPATCHED_METHOD_NAME = ParameterLookupDispatchAction.class.getName() + ".DISPATCHED_METHOD_NAME";
