@@ -4,7 +4,9 @@
 
 package nl.b3p.commons.struts;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.struts.action.ActionForm;
@@ -46,27 +48,55 @@ public class DynaFormDispatchAction extends DispatchAction {
 		 * alleen indien deze methode niet overridden is. Probeer een unspecified()
 		 * methode met als tweede parameter een DynaValidatorForm aan te roepen:
 		 */
+		Method method;
 		try {
-			Method method = getMethod("unspecified");
-			Object args[] = {mapping, form, request, response};
-			return (ActionForward)method.invoke(this, args);
+			method = getMethod("unspecified");
 		} catch(NoSuchMethodException nsme) {
 			/* Indien geen unspecified met DynaValidatorForm parameter roep super
 			 * implementatie aan welke een ServletException throwt
 			 */
 			return super.unspecified(mapping, form, request, response);
 		}
+		try {
+			Object args[] = {mapping, form, request, response};
+			return (ActionForward)method.invoke(this, args);
+		} catch(InvocationTargetException e) {
+			/* Zelfde logica als in DispatchAction.dispatchMethod() */
+
+			// Rethrow the target exception if possible so that the
+			// exception handling machinery can deal with it
+			Throwable t = e.getTargetException();
+			if (t instanceof Exception) {
+				throw ((Exception) t);
+			} else {
+				throw new ServletException(t);
+			}
+		}
 	}
 
 	protected ActionForward cancelled(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		/* Idem voor cancelled() als voor unspecified() */
+		Method method;
 		try {
-			Method method = getMethod("cancelled");
-			Object args[] = {mapping, form, request, response};
-			return (ActionForward)method.invoke(this, args);
+			method = getMethod("cancelled");
 		} catch(NoSuchMethodException nsme) {
 			/* super implementatie aanroepen, returnt null */
 			return super.cancelled(mapping, form, request, response);
+		}
+		try {
+			Object args[] = {mapping, form, request, response};
+			return (ActionForward)method.invoke(this, args);
+		} catch(InvocationTargetException e) {
+			/* Zelfde logica als in DispatchAction.dispatchMethod() */
+
+			// Rethrow the target exception if possible so that the
+			// exception handling machinery can deal with it
+			Throwable t = e.getTargetException();
+			if (t instanceof Exception) {
+				throw ((Exception) t);
+			} else {
+				throw new ServletException(t);
+			}
 		}
 	}
 }
