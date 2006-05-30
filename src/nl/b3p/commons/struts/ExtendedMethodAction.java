@@ -73,7 +73,8 @@ public abstract class ExtendedMethodAction extends MethodPropertiesAction {
         
         if(alternateMessagekey != null)
             addMessage(request, alternateMessagekey, cause);
-        
+        else 
+            addMessage(request, "error.general", cause);
     }
     
     protected ActionForward getAlternateForward(ActionMapping mapping, HttpServletRequest request) {
