@@ -167,6 +167,14 @@ public class CrudAction extends ExtendedMethodAction {
         return redispatchFormField(mapping, dynaForm, request, response, ALTERNATE_FORWARDFIELD);
     }
     
+    protected String getAction(DynaValidatorForm dynaForm) throws Exception {
+        return dynaForm.getString(DEFAULT_FORWARDFIELD);
+    }
+    
+    protected String getAltAction(DynaValidatorForm dynaForm) throws Exception {
+        return dynaForm.getString(ALTERNATE_FORWARDFIELD);
+    }
+    
     public ActionForward execute(ActionMapping mapping, ActionForm  form,
             HttpServletRequest request, HttpServletResponse response)
             throws Exception {

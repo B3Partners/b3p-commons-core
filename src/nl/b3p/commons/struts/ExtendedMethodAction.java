@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.apache.struts.action.ActionMessage;
 import org.apache.struts.util.MessageResources;
 import org.apache.struts.validator.DynaValidatorForm;
 
@@ -58,12 +59,6 @@ public abstract class ExtendedMethodAction extends MethodPropertiesAction {
     }
     
     protected void addAlternateMessage(ActionMapping mapping, HttpServletRequest request, String causeKey, String cause) {
-        if (cause == null) {
-            MessageResources messages = getResources(request);
-            Locale locale = getLocale(request);
-            cause = messages.getMessage(locale, causeKey);
-        }
-        
         String alternateMessagekey = null;
         
         ExtendedMethodProperties props = (ExtendedMethodProperties)getMethodProperties(request);
@@ -71,10 +66,21 @@ public abstract class ExtendedMethodAction extends MethodPropertiesAction {
             alternateMessagekey = props.getAlternateMessageKey();
         }
         
-        if(alternateMessagekey != null)
+        if(alternateMessagekey != null) {
+            if (cause == null) {
+                MessageResources messages = getResources(request);
+                Locale locale = getLocale(request);
+                cause = messages.getMessage(locale, causeKey);
+            }
             addMessage(request, alternateMessagekey, cause);
-        else 
-            addMessage(request, "error.general", cause);
+            
+        } else if (cause != null) {
+            ActionMessage message = new ActionMessage(cause, false);
+            addMessage(request, message);
+            
+        } else if (causeKey != null) {
+            addMessage(request, causeKey);
+        }
     }
     
     protected ActionForward getAlternateForward(ActionMapping mapping, HttpServletRequest request) {
