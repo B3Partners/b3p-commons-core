@@ -1,20 +1,11 @@
 package nl.b3p.commons.taglib;
 
-import java.io.IOException;
-import java.lang.*;
 import java.util.*;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspWriter;
-import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.TagSupport;
 
-import java.lang.reflect.InvocationTargetException;
-import org.apache.commons.beanutils.PropertyUtils;
-
 import nl.b3p.commons.services.*;
-
-import java.math.BigDecimal;
 
 /**
  * Sorteert een list van beans op een veld naar keuze.
@@ -35,7 +26,7 @@ public final class SortBeanListTag extends TagSupport {
     
     // --------------------------------------------------- Instance Variables
     
-    private String svar = "";
+    private Object svar = null;
     private String field = "label";
     private String reverse = "false";
     
@@ -43,14 +34,14 @@ public final class SortBeanListTag extends TagSupport {
     /** Getter for property svar.
      * @return Value of property svar.
      */
-    public java.lang.String getSvar() {
+    public Object getSvar() {
         return svar;
     }
     
     /** Setter for property svar.
      * @param svar New value of property svar.
      */
-    public void setSvar(java.lang.String svar) {
+    public void setSvar(Object svar) {
         this.svar = svar;
     }
     
@@ -107,16 +98,28 @@ public final class SortBeanListTag extends TagSupport {
         if (this.field.length()<1)
             return (EVAL_PAGE);
         
-        // als er geen list is opgegeven gewoon doorgaan
-        if (this.svar.length()<1)
-            return (EVAL_PAGE);
+        List theList = null;
         
-        // zoek de sessie
-        HttpSession session = pageContext.getSession();
-        if (session == null)
-            return (EVAL_PAGE);
+        if (this.svar instanceof String) {
+            
+            String sessionList = (String)this.svar;
+            // als er geen list is opgegeven gewoon doorgaan
+            if (sessionList.length()<1)
+                return (EVAL_PAGE);
+            
+            // zoek de sessie
+            HttpSession session = pageContext.getSession();
+            if (session == null)
+                return (EVAL_PAGE);
+            
+            theList = (List) session.getAttribute(sessionList);
+            
+        } else if (this.svar instanceof List) {
+            
+            theList = (List)this.svar;
+            
+        }
         
-        ArrayList theList = (ArrayList) session.getAttribute(this.svar);
         if (theList==null || theList.isEmpty())
             return (EVAL_PAGE);
         
@@ -141,7 +144,7 @@ public final class SortBeanListTag extends TagSupport {
      */
     public void release() {
         super.release();
-        this.svar = "";
+        this.svar = null;
         this.field = "label";
         this.reverse = "false";
     }
