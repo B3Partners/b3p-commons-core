@@ -1,10 +1,8 @@
 package nl.b3p.commons.services;
 
-import java.lang.*;
 import java.util.*;
 import java.lang.reflect.InvocationTargetException;
 import org.apache.commons.beanutils.PropertyUtils;
-import java.math.BigDecimal;
 
 public class BeanCompare implements Comparator {
     
@@ -18,8 +16,24 @@ public class BeanCompare implements Comparator {
         Object compareObject = null;
         Object compareObject1 = null;
         try {
-            compareObject = PropertyUtils.getProperty(obj, compareField);
-            compareObject1 = PropertyUtils.getProperty(obj1, compareField);
+            if(compareField.indexOf(".") != -1) {
+                String[] compareFields = compareField.split("\\.");
+                Object compareSubObject = null;
+                Object compareSubObject1 = null;
+                String compareEndField = "";
+                for(int i = 0; i < compareFields.length; i++) {
+                    if((i-1) != -1) {
+                        compareSubObject = PropertyUtils.getProperty(obj, compareFields[i-1]);
+                        compareSubObject1 = PropertyUtils.getProperty(obj1, compareFields[i-1]);
+                        compareEndField = compareFields[i];
+                    }
+                }
+                compareObject = PropertyUtils.getProperty(compareSubObject, compareEndField);
+                compareObject1 = PropertyUtils.getProperty(compareSubObject1, compareEndField);
+            } else {
+                compareObject = PropertyUtils.getProperty(obj, compareField);
+                compareObject1 = PropertyUtils.getProperty(obj1, compareField);
+            }
         } catch (IllegalAccessException iae) {
         } catch (InvocationTargetException ite) {
         } catch (NoSuchMethodException nsme) {
