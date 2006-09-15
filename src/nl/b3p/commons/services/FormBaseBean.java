@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,6 +40,7 @@ public abstract class FormBaseBean {
     protected ActionMessages errors = null;
     protected HttpSession session = null;
     protected HttpServletRequest request = null;
+    protected HttpServletResponse response = null;
     protected Locale locale = null;
     protected MessageResources messages = null;
     protected DynaValidatorForm form = null;
@@ -394,6 +396,78 @@ public abstract class FormBaseBean {
                 log.error("Dynaform get ClassCastException ", cce);
             throw new B3pCommonsException("setForm Error: ",  cce);
         }
+    }
+
+    public ActionMessages getErrors() {
+        return errors;
+    }
+
+    public void setErrors(ActionMessages errors) {
+        this.errors = errors;
+    }
+
+    public HttpSession getSession() {
+        return session;
+    }
+
+    public void setSession(HttpSession session) {
+        this.session = session;
+    }
+
+    public HttpServletRequest getRequest() {
+        return request;
+    }
+
+    public void setRequest(HttpServletRequest request) {
+        this.request = request;
+    }
+
+    public HttpServletResponse getResponse() {
+        return response;
+    }
+
+    public void setResponse(HttpServletResponse response) {
+        this.response = response;
+    }
+
+    public Locale getLocale() {
+        return locale;
+    }
+
+    public void setLocale(Locale locale) {
+        this.locale = locale;
+    }
+
+    public MessageResources getMessages() {
+        return messages;
+    }
+
+    public void setMessages(MessageResources messages) {
+        this.messages = messages;
+    }
+
+    public DynaValidatorForm getForm() {
+        return form;
+    }
+
+    public void setForm(DynaValidatorForm form) {
+        this.form = form;
+    }
+
+    public Map getRequestParams() {
+        return requestParams;
+    }
+
+    public void setRequestParams(Map requestParams) {
+        this.requestParams = requestParams;
+    }
+
+    public ActionMapping getMapping() {
+        return mapping;
+    }
+
+    public void setMapping(ActionMapping mapping) {
+        this.mapping = mapping;
     }
     
 }
