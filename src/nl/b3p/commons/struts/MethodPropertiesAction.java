@@ -81,4 +81,13 @@ public abstract class MethodPropertiesAction extends ParameterLookupDispatchActi
 	protected void addMessage(HttpServletRequest request, String resourceKey, Object[] args) {
 		addMessage(request, new ActionMessage(resourceKey, args));
 	}
+    
+    protected void addAttributeMessage(HttpServletRequest request, String attribute, ActionMessage message) {
+        ActionMessages messages = (ActionMessages)request.getAttribute(attribute);
+        if(messages == null) {
+            messages = new ActionMessages();
+            request.setAttribute(attribute, messages);
+        }
+        messages.add(ActionMessages.GLOBAL_MESSAGE, message);
+    }
 }
