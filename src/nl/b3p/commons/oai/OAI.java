@@ -50,6 +50,10 @@ public class OAI extends HttpServlet
             token = null;
         
         try {
+            
+            if ((formname == null) || formname.trim().equals(""))
+                throw new BadVerb("no verb specified!");
+            
             // check the number of parameters
             int numofparameters = 0;
             Hashtable params = new Hashtable();
@@ -180,19 +184,19 @@ public class OAI extends HttpServlet
         result = result.substring(0, result.length() - 5);
         return result;
     }
-
+    
     public static Identity getConfig() {
         return config;
     }
-
+    
     public static void setConfig(Identity aConfig) {
         config = aConfig;
     }
-
+    
     public static RecordFactory getRf() {
         return rf;
     }
-
+    
     public static void setRf(RecordFactory aRf) {
         rf = aRf;
     }
