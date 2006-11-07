@@ -13,10 +13,10 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionError;
-import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
+import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMessages;
 import org.apache.struts.util.MessageResources;
 import org.apache.struts.validator.DynaValidatorForm;
@@ -99,11 +99,13 @@ public abstract class EditBaseBean extends FormBaseBean {
     public static final String EDIT_ACTION = "Edit";
     public static final String NEW_ACTION = "New";
     public static final String SAVE_ACTION = "Save";
+    public static final String SAVENEW_ACTION = "SaveNew";
     public static final String DELETE_ACTION = "Delete";
     
     // Volgende knop wordt aangevuld met rangnummer van subtabel
     public static final String SUBDELETE_ACTION = "SubDelete";
     public static final String SUBNEW_ACTION = "SubNew";
+    public static final String SUBSAVENEW_ACTION = "SubSaveNew";
     public static final String SUBSAVE_ACTION = "SubSave";
     public static final String SUBEDIT_ACTION = "SubEdit";
     
@@ -114,11 +116,13 @@ public abstract class EditBaseBean extends FormBaseBean {
     public static final String DELETE_BUTTON = "delete";
     public static final String NEW_BUTTON = "new";
     public static final String SAVE_BUTTON = "save";
+    public static final String SAVENEW_BUTTON = "savenew";
     public static final String EDIT_BUTTON = "edit";
     
     // Volgende knoppen worden aangevuld met rangnummer van subtabel
     public static final String SUBNEW_BUTTON = "subnew";
     public static final String SUBSAVE_BUTTON = "subsave";
+    public static final String SUBSAVENEW_BUTTON = "subsavenew";
     public static final String SUBDELETE_BUTTON = "subdelete";
     public static final String SUBEDIT_BUTTON = "subedit";
     
@@ -201,49 +205,65 @@ public abstract class EditBaseBean extends FormBaseBean {
             return mapping.findForward("failure");
         }
         
-        ActionErrors verrs = determineAction(tokenValid, transactionCancelled, validateErrors);
-        
-        determineObjects();
-        
         ActionForward f = null;
         try {
-            f = doCreateAction();
-            if (f!=null)
-                return f;
+            ActionErrors verrs = determineAction(tokenValid, transactionCancelled, validateErrors);
             
-            f = doDeleteAction();
-            if (f!=null)
-                return f;
+            determineObjects();
             
-            f = doSaveAction(verrs);
-            // Alternatief: f = doSaveAllAction(verrs);
-            if (f!=null)
-                return f;
-            
-            f = doEditAction(verrs);
-            if (f!=null)
-                return f;
-            
-            int numOfSubs = subObjects.size();
-            if (theObject!=null) {
+            // Welke knop is geklikt
+            if (buttonPressed(OK_BUTTON)) {
+                f = confirmButton(verrs);
+            } else if (buttonPressed(CANCEL_BUTTON)) {
+                f = cancelButton();
+            } else if (buttonPressed(DELETE_BUTTON)) {
+                f = deleteButton();
+            } else if (buttonPressed(NEW_BUTTON)) {
+                f = newButton();
+            } else if (buttonPressed(SAVE_BUTTON)) {
+                f = saveButton(verrs);
+            } else if (buttonPressed(SAVENEW_BUTTON)) {
+                f = saveNewButton(verrs);
+            } else if (buttonPressed(EDIT_BUTTON)) {
+                f = editButton(verrs);
+            } else {
+                // Volgende knoppen worden aangevuld met rangnummer van subtabel
+                int numOfSubs = subObjects.size();
                 for (int subNum=1; subNum<=numOfSubs; subNum++) {
-                    f = doSubEditAction(subNum, verrs);
-                    if (f!=null)
-                        return f;
-                    f = doSubDeleteAction(subNum);
-                    if (f!=null)
-                        return f;
-                    f = doSubSaveAction(subNum, verrs);
-                    if (f!=null)
-                        return f;
+                    if (buttonPressed(SUBNEW_BUTTON + subNum)) {
+                        f = subNewButton(subNum);
+                        break;
+                    } else if (buttonPressed(SUBSAVE_BUTTON + subNum)) {
+                        f = subSaveButton(subNum, verrs);
+                        break;
+                    } else if (buttonPressed(SUBSAVENEW_BUTTON + subNum)) {
+                        f = subSaveNewButton(subNum, verrs);
+                        break;
+                    } else if (buttonPressed(SUBDELETE_BUTTON + subNum)) {
+                        f = subDeleteButton(subNum);
+                        break;
+                    } else if (buttonPressed(SUBEDIT_BUTTON + subNum)) {
+                        f = subEditButton(subNum);
+                        break;
+                    } else if (buttonPressed(NEWJOIN_BUTTON + subNum)) {
+                        f = newJoinButton(subNum, verrs);
+                        break;
+                    } else if (buttonPressed(DELETEJOIN_BUTTON + subNum)) {
+                        f = deleteJoinButton(subNum, verrs);
+                        break;
+                    }
                 }
             }
+            if (f!=null)
+                return f;
+            
             
             f = populateMainForm();
             if (f!=null)
                 return f;
             
             if (theObject!=null) {
+                int numOfSubs = subObjects.size();
                 for (int subNum=1; subNum<=numOfSubs; subNum++) {
                     f = populateSubForms(subNum);
                     if (f!=null)
@@ -253,24 +273,19 @@ public abstract class EditBaseBean extends FormBaseBean {
             
             determineNewAction();
             
+        } catch (Exception e) {
+            log.error("error: ", e);
+            errors.add(MAIN_MESSAGE, new ActionError("error.database", e.getMessage()));
+            return (mapping.findForward("failure"));
         } finally {
-            
+            // evt list maken?
+        }
+        
+        try {
             // Aanmaken lijst voor koppeltabel
-            try {
-                createJoinList();
-            } catch (B3pCommonsException be) {
-                errors.add(MAIN_MESSAGE, new ActionError("error.invoerenrecord.general"));
-                return mapping.findForward("failure");
-            }
-            
+            createJoinList();
             // Aanmaken van lijsten en plaatsen op de sessie
-            try {
-                createLists();
-            } catch (B3pCommonsException be) {
-                errors.add(MAIN_MESSAGE, new ActionError("error.invoerenrecord.general"));
-                return mapping.findForward("failure");
-            }
-            
+            createLists();
             // Voor formulier specifieke afhandelingen
             f = userProcess(tokenValid, transactionCancelled, validateErrors);
             if (f!=null) {
@@ -281,6 +296,10 @@ public abstract class EditBaseBean extends FormBaseBean {
                     return f;
                 }
             }
+        } catch (B3pCommonsException be) {
+            log.error("error2: ", be);
+            errors.add(MAIN_MESSAGE, new ActionError("error.invoerenrecord.general", be.getMessage()));
+            return mapping.findForward("failure");
         }
         
         return mapping.findForward("success");
@@ -298,13 +317,9 @@ public abstract class EditBaseBean extends FormBaseBean {
      * @param transactionCancelled true als de cancel knop geklikt is
      * @return foutenmeldingen van formulier
      */
-    protected ActionErrors determineAction(boolean tokenValid, boolean transactionCancelled, ActionErrors validateErrors) {
-        try {
-            action = getParamAsString("action");
-        } catch (B3pCommonsException be) {
-            if (log.isErrorEnabled())
-                log.error(be);
-        }
+    protected ActionErrors determineAction(boolean tokenValid,
+            boolean transactionCancelled, ActionErrors validateErrors) throws B3pCommonsException {
+        action = getParamAsString("action");
         
         newAction = action;
         if (nullOrEmpty(action)) {
@@ -347,17 +362,21 @@ public abstract class EditBaseBean extends FormBaseBean {
         theObject = null;
         try {
             theObject = getMainObject();
-        } catch (B3pCommonsException te) {}
+        } catch (B3pCommonsException ex) {
+            log.debug("no main object!");
+        }
         if (theObject==null)
             return;
         // Haal actieve gekoppelde objecten op, indien van toepassing
-        try {
-            int subNum = 1;
-            do {
+        int subNum = 1;
+        do {
+            try {
                 subObjects.add(getSubObject(subNum)); // 0-based
-                subNum++;
-            } while (subNum<=10); // limiet om einde van loop zeker te stellen
-        } catch (B3pCommonsException te) {}
+            } catch (B3pCommonsException ex) {
+                log.debug("no subobject" + subNum + "!");
+            } // 0-based
+            subNum++;
+        } while (subNum<=10); // limiet om einde van loop zeker te stellen
     }
     
     /**
@@ -377,68 +396,250 @@ public abstract class EditBaseBean extends FormBaseBean {
      * <p>
      * @return Deze implementatie retourneert altijd <code>null</code>.
      */
-    protected ActionForward userProcess(boolean tokenValid, boolean transactionCancelled, ActionErrors validateErrors) {
+    protected ActionForward userProcess(boolean tokenValid,
+            boolean transactionCancelled, ActionErrors validateErrors) throws B3pCommonsException {
         return null;
     }
     
-    /**
-     * Deze functie checkt of de NEW_ACTION moet worden uitgevoerd. Afhankelijk
-     * van het feit of het record nieuw of bestaand is krijgt de gebruiker een melding.
-     * Het daadwerkelijke opslaan volgt in de volgende ronde, indien de PROCESS_ACTION
-     * wordt uitgevoerd.
-     * <p>
-     * @return altijd null
-     */
-    protected ActionForward doCreateAction() {
-        // Bij create mode wordt process omgeleid met nieuwe action
-        if (isAction(NEW_ACTION) && buttonPressed(OK_BUTTON)) {
-            if (allowEdits) {
+    protected ActionForward confirmButton(ActionErrors validateErrors) throws B3pCommonsException {
+        if (allowEdits) {
+            
+            if (isAction(SAVE_ACTION)) {
+                return saveAction(validateErrors);
+//                return saveAllAction(validateErrors);
+            }
+            if (isAction(DELETE_ACTION) && theObject!=null) {
+                return deleteAction();
+            }
+            
+            int numOfSubs = subObjects.size();
+            for (int subNum=1; subNum<=numOfSubs; subNum++) {
+                Object subObject =(Object) subObjects.get(subNum-1);
+                if (subObject!=null) {
+                    String subSaveAction = SUBSAVE_ACTION + subNum;
+                    if (subSaveAction.equals(action)) {
+                        return subSaveAction(subNum, validateErrors);
+                    }
+                    String subEditAction = SUBEDIT_ACTION + subNum;
+                    String subDeleteAction = SUBDELETE_ACTION + subNum;
+                    if (subDeleteAction.equals(action) && subObject!=null) {
+                        return subDeleteAction(subNum);
+                    }
+                }
+            }
+            
+        } else {
+            errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
+            newAction = EDIT_ACTION;
+        }
+        return null;
+    }
+    
+    protected ActionForward cancelButton() throws B3pCommonsException {
+        log.info(" Cancel action");
+        int numOfSubs = subObjects.size();
+        Object subObject;
+        for (int subNum=1; subNum<=numOfSubs; subNum++) {
+            // Bij annuleren worden de velden dan gereset via nieuw subobject
+            subObject = getNewSubObject(subNum);
+            subObjects.set(subNum-1,  subObject);
+            setSubID(subNum, "");
+        }
+        newAction = EDIT_ACTION;
+        return null;
+    }
+    
+    protected ActionForward deleteButton() throws B3pCommonsException {
+        if (isAction(EDIT_ACTION) && allowEdits && theObject!=null) {
+            if (directDelete) {
+                return deleteAction();
+            } else {
+                log.debug(" delete");
+                errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.delete"));
+                newAction = DELETE_ACTION;
+            }
+        } else {
+            errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
+        }
+        return null;
+    }
+    
+    protected ActionForward newButton() throws B3pCommonsException {
+        if (isAction(EDIT_ACTION) && allowEdits) {
+            log.debug(" Reset DynaForm bean under key " + mapping.getAttribute());
+            form.initialize(mapping);
+            theObject = getNewObject();
+            // merker dat record nieuw is, wordt later op gecheckt
+            setID(Integer.toString(TEMPNEW_ID));
+            int numOfSubs = subObjects.size();
+            for (int subNum=1; subNum<=numOfSubs; subNum++) {
+                setSubID(subNum, null);
+                Object subObject = getNewSubObject(subNum);
+                subObjects.set(subNum-1, subObject );
+            }
+            log.debug(" create new");
+//                errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.new"));
+        } else {
+            errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
+        }
+        newAction = EDIT_ACTION;
+        return null;
+    }
+    
+    protected ActionForward saveButton(ActionErrors validateErrors) throws B3pCommonsException {
+        if (isAction(EDIT_ACTION) && allowEdits ) {
+            if (directSave) {
+                return saveAction(validateErrors);
+            } else {
                 if (theObject!=null) {
-                    if (log.isDebugEnabled())
-                        log.debug(" process this, save existing");
+                    log.debug(" save existing");
                     errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.save"));
                 } else {
-                    if (log.isDebugEnabled())
-                        log.debug(" process this, create new");
+                    log.debug(" create new");
                     errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.new"));
                 }
                 newAction = SAVE_ACTION;
-            } else {
-                errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
-                newAction = EDIT_ACTION;
             }
+        } else {
+            errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
         }
-        if (isAction(NEW_ACTION) && buttonPressed(CANCEL_BUTTON)) {
-            if (log.isInfoEnabled())
-                log.info(" Cancel new action");
+        return null;
+    }
+    
+    protected ActionForward saveNewButton(ActionErrors validateErrors) throws B3pCommonsException {
+        if (isAction(EDIT_ACTION) && allowEdits ) {
+            log.debug(" save current");
+            saveAction(validateErrors);
+            
+            form.initialize(mapping);
+            theObject = getNewObject();
+            // merker dat record nieuw is, wordt later op gecheckt
+            setID(Integer.toString(TEMPNEW_ID));
+            int numOfSubs = subObjects.size();
+            for (int subNum=1; subNum<=numOfSubs; subNum++) {
+                setSubID(subNum, null);
+                Object subObject = getNewSubObject(subNum);
+                subObjects.set(subNum-1, subObject );
+            }
+            log.debug(" create new");
+            
+        } else {
+            errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
+        }
+        return null;
+    }
+    
+    protected ActionForward editButton(ActionErrors validateErrors) throws B3pCommonsException {
+        newAction = EDIT_ACTION;
+        return null;
+    }
+    
+    protected ActionForward subNewButton(int subNum) throws B3pCommonsException {
+        String subEditAction = SUBEDIT_ACTION + subNum;
+        if ((isAction(EDIT_ACTION) || isAction(subEditAction)) && allowEdits) {
+            Object subObject =(Object) subObjects.get(subNum-1);
+            // merker dat record nieuw is, wordt later op gecheckt
+            setSubID(subNum, Integer.toString(TEMPNEW_ID));
+            subObject = getNewSubObject(subNum);
+            subObjects.set(subNum-1, subObject );
+//          errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subnew", getSubNames(subNum)));
+            newAction = SUBEDIT_ACTION + subNum;
+        } else {
+            errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.notallowed"));
             newAction = EDIT_ACTION;
         }
         return null;
     }
     
-    /**
-     * Deze functie checkt of de DELETE_ACTION moet worden uitgevoerd. Het hoofdrecord met alle
-     * bijbehorende subrecords wordt dan gewist. In de vorige ronde is een waarschuwing gegeven!
-     * <p>
-     * @return niet null bij fouten
-     */
-    protected ActionForward doDeleteAction() {
-        // Was this transaction a Delete?
-        if (isAction(DELETE_ACTION) && buttonPressed(OK_BUTTON) && theObject!=null) {
-            if (allowEdits) {
-                return deleteAction();
+    protected ActionForward subSaveButton(int subNum, ActionErrors validateErrors) throws B3pCommonsException {
+        Object subObject =(Object) subObjects.get(subNum-1);
+        String subEditAction = SUBEDIT_ACTION + subNum;
+        if (isAction(subEditAction) && allowEdits) {
+            if (directSubSave) {
+                return subSaveAction(subNum, validateErrors);
             } else {
-                errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
-                newAction = EDIT_ACTION;
+                if (subObject!=null) {
+                    log.debug(" subsave existing");
+                    errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subsave", getSubNames(subNum)));
+                } else {
+                    log.debug(" create subnew");
+                    errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subnew", getSubNames(subNum)));
+                }
+                newAction = SUBSAVE_ACTION +subNum;
             }
+        } else {
+            errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.notallowed"));
         }
-        if (isAction(DELETE_ACTION) && buttonPressed(CANCEL_BUTTON)) {
-            if (log.isInfoEnabled())
-                log.info(" Cancel delete action");
+        return null;
+    }
+    
+    protected ActionForward subSaveNewButton(int subNum, ActionErrors validateErrors) throws B3pCommonsException {
+        Object subObject =(Object) subObjects.get(subNum-1);
+        String subEditAction = SUBEDIT_ACTION + subNum;
+        if (isAction(subEditAction) && allowEdits) {
+            subSaveAction(subNum, validateErrors);
+            
+            // merker dat record nieuw is, wordt later op gecheckt
+            setSubID(subNum, Integer.toString(TEMPNEW_ID));
+            subObject = getNewSubObject(subNum);
+            subObjects.set(subNum-1, subObject );
+            
+        } else {
+            errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.notallowed"));
+        }
+        return null;
+    }
+    
+    protected ActionForward subDeleteButton(int subNum) throws B3pCommonsException {
+        Object subObject =(Object) subObjects.get(subNum-1);
+        String subEditAction = SUBEDIT_ACTION + subNum;
+        if (isAction(subEditAction) && allowEdits && subObject!=null) {
+            if (directSubDelete) {
+                return subDeleteAction(subNum);
+            }
+            log.debug(" delete subrecord");
+            errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subdelete", getSubNames(subNum)));
+            newAction = SUBDELETE_ACTION + subNum;
+        } else {
+            errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.notallowed"));
             newAction = EDIT_ACTION;
         }
         return null;
     }
+    
+    protected ActionForward subEditButton(int subNum) throws B3pCommonsException {
+        Object subObject =(Object) subObjects.get(subNum-1);
+        if (subObject!=null) {
+            log.debug(" edit subrecord");
+//                            errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subedit", getSubNames(subNum)));
+            newAction = SUBEDIT_ACTION + subNum;
+        } else {
+            log.debug(" edit subrecord, but no subrecord present");
+//                            errors.add(SUB_MESSAGE + subNum, new ActionError("error.invoerenrecord.nosubedit", getSubNames(subNum)));
+        }
+        return null;
+    }
+    
+    protected ActionForward newJoinButton(int subNum, ActionErrors validateErrors) throws B3pCommonsException {
+        if (isAction(EDIT_ACTION) && allowEdits) {
+            createJoin(subNum);
+        } else {
+            errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
+            newAction = EDIT_ACTION;
+        }
+        return null;
+    }
+    
+    protected ActionForward deleteJoinButton(int subNum, ActionErrors validateErrors) throws B3pCommonsException {
+        if (isAction(EDIT_ACTION) && allowEdits) {
+            deleteJoin(subNum);
+        } else {
+            errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
+            newAction = EDIT_ACTION;
+        }
+        return null;
+    }
+    
     
     /**
      * Het hoofdrecord met alle bijbehorende subrecords wordt gewist.
@@ -446,31 +647,22 @@ public abstract class EditBaseBean extends FormBaseBean {
      * <p>
      * @return niet null bij fouten
      */
-    protected ActionForward deleteAction() {
-        if (log.isInfoEnabled())
-            log.info(" Deleting Record '" + theObject.toString() + "'");
-        try {
-            int numOfSubs = subObjects.size();
-            for (int subNum=1; subNum<=numOfSubs; subNum++) {
-                Object subObject =(Object) subObjects.get(subNum-1);
-                if (subObject!=null) {
-                    deleteSubObject(subNum);
-                    subObject = null;
-                    subObjects.set(subNum-1, subObject );
-                    setSubID(subNum, null);
-                }
+    protected ActionForward deleteAction() throws B3pCommonsException {
+        log.info(" Deleting Record '" + theObject.toString() + "'");
+        int numOfSubs = subObjects.size();
+        for (int subNum=1; subNum<=numOfSubs; subNum++) {
+            Object subObject =(Object) subObjects.get(subNum-1);
+            if (subObject!=null) {
+                deleteSubObject(subNum);
+                subObject = null;
+                subObjects.set(subNum-1, subObject );
+                setSubID(subNum, null);
             }
-            deleteObject();
-            theObject = null;
-            setID(null);
-        } catch (B3pCommonsException dbe) {
-            if (log.isErrorEnabled())
-                log.error("  Database error deleting: ", dbe);
-            errors.add(MAIN_MESSAGE, new ActionError("error.database", dbe.getMessage()));
-            return (mapping.findForward("failure"));
         }
-        if (log.isDebugEnabled())
-            log.debug(" Reset DynaForm bean under key " + mapping.getAttribute());
+        deleteObject();
+        theObject = null;
+        setID(null);
+        log.debug(" Reset DynaForm bean under key " + mapping.getAttribute());
         
         form.initialize(mapping);
         subObjects = new ArrayList();
@@ -483,25 +675,24 @@ public abstract class EditBaseBean extends FormBaseBean {
     }
     
     /**
-     * Deze functie checkt of de SAVE_ACTION moet worden uitgevoerd.
+     * Deze functie wist een subrecord.
      * <p>
-     * @param validateErrors zoals deze door struts zijn vastgesteld
-     * @return niet null bij validatie errors
+     * @return niet null bij fouten
+     * @param subNum rangnummer van formulier
      */
-    protected ActionForward doSaveAction(ActionErrors validateErrors) {
-        if (isAction(SAVE_ACTION) && buttonPressed(OK_BUTTON)) {
-            if (allowEdits) {
-                return saveAction(validateErrors);
-            } else {
-                errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
-                newAction = EDIT_ACTION;
-            }
-        }
-        if (isAction(SAVE_ACTION) && buttonPressed(CANCEL_BUTTON)) {
-            if (log.isInfoEnabled())
-                log.info(" Cancel save action");
-            newAction = EDIT_ACTION;
-        }
+    protected ActionForward subDeleteAction(int subNum) throws B3pCommonsException {
+        Object subObject =(Object) subObjects.get(subNum-1);
+        log.info(" deleting subrecord '" + subObject.toString() + "'");
+        deleteSubObject(subNum);
+        // HACK: door een leeg object door te geven wordt dit subformulier gewist
+        subObject = getNewSubObject(subNum);
+        subObjects.set(subNum-1, subObject );
+        setSubID(subNum, null);
+        newAction = EDIT_ACTION;
+        
+        if (directSubDelete)
+            errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subdeletedone", getSubNames(subNum)));
+        
         return null;
     }
     
@@ -515,32 +706,23 @@ public abstract class EditBaseBean extends FormBaseBean {
      * @param validateErrors zoals deze door struts zijn vastgesteld
      * @return niet null bij validatie errors
      */
-    protected ActionForward saveAction(ActionErrors validateErrors) {
+    protected ActionForward saveAction(ActionErrors validateErrors) throws B3pCommonsException {
         // validatie
         if (reduceMainErrors(validateErrors)) {
-            if (log.isInfoEnabled())
-                log.info("Validation error!");
+            log.info("Validation error!");
             errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.savewitherrors"));
             newAction = SAVE_ACTION;
         } else {
-            try {
-                // Het hoofdobject wordt alleen aangemaakt, indien
-                // in het form een merker is aangebracht die dit aangeeft.
-                if (theObject == null && Integer.toString(TEMPNEW_ID).equals(getMainID())) {
-                    theObject = getNewObject();
-                    subObjects = new ArrayList();
-                }
-                if (theObject!=null) {
-                    populateObject();
-                    syncID();
-                    if (log.isDebugEnabled())
-                        log.debug(" Populating database object from form bean");
-                }
-            } catch (Exception dbe) {
-                if (log.isErrorEnabled())
-                    log.error("  Database error creating object: ", dbe);
-                errors.add(MAIN_MESSAGE, new ActionError("error.database", dbe.getMessage()));
-                return (mapping.findForward("failure"));
+            // Het hoofdobject wordt alleen aangemaakt, indien
+            // in het form een merker is aangebracht die dit aangeeft.
+            if (theObject == null && Integer.toString(TEMPNEW_ID).equals(getMainID())) {
+                theObject = getNewObject();
+                subObjects = new ArrayList();
+            }
+            if (theObject!=null) {
+                populateObject();
+                syncID();
+                log.debug(" Populating database object from form bean");
             }
             newAction = EDIT_ACTION;
             if (directSave)
@@ -549,400 +731,6 @@ public abstract class EditBaseBean extends FormBaseBean {
         return null;
     }
     
-    /**
-     * Deze functie checkt of de EDIT_ACTION moet worden uitgevoerd. Dit is de hoofdactie
-     * van het formulier. Meestal wordt vanuit deze actie een nieuwe actie gestart, de gebruiker
-     * krijgt dan bij de volgende ronde een melding en de gewenste actie kan dan worden afgemaakt.
-     * <p>
-     * Vanuit de EDIT_ACTION kan het hoofdrecord in de volgende ronde bewerkt, gewist of nieuw gemaakt
-     * worden. Ook kan een many-to-many koppeling worden gemaakt of verbroken.
-     * <p>
-     * @return altijd null
-     * @param validateErrors foutenmeldingen van formulier
-     */
-    protected ActionForward doEditAction(ActionErrors validateErrors) {
-        
-        int numOfSubs = subObjects.size();
-        
-        // Bij edit mode worden new en delete omgeleid met nieuwe action
-        if (isAction(EDIT_ACTION)) {
-            // wis scherm om nieuw record te kunnen creeren
-            if (buttonPressed(NEW_BUTTON)) {
-                if (allowEdits) {
-                    if (log.isDebugEnabled())
-                        log.debug(" Reset DynaForm bean under key " + mapping.getAttribute());
-                    form.initialize(mapping);
-                    try {
-                        theObject = getNewObject();
-                        // merker dat record nieuw is, wordt later op gecheckt
-                        setID(Integer.toString(TEMPNEW_ID));
-                        for (int subNum=1; subNum<=numOfSubs; subNum++) {
-                            setSubID(subNum, null);
-                            Object subObject = getNewSubObject(subNum);
-                            subObjects.set(subNum-1, subObject );
-                        }
-                    } catch (B3pCommonsException me) {}
-                    if (log.isDebugEnabled())
-                        log.debug(" create new");
-//                errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.new"));
-                } else {
-                    errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
-                }
-                newAction = EDIT_ACTION;
-            }
-            // bewaar dit record
-            if (buttonPressed(SAVE_BUTTON)) {
-                if (allowEdits) {
-                    if (directSave) {
-                        ActionForward p = saveAction(validateErrors);
-                        if (p!=null)
-                            return p;
-                    } else {
-                        if (reduceMainErrors(validateErrors)) {
-                            if (log.isInfoEnabled())
-                                log.info("Validation error!");
-                            errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.savewitherrors"));
-                        } else {
-                            if (theObject!=null) {
-                                if (log.isDebugEnabled())
-                                    log.debug(" save existing");
-                                errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.save"));
-                            } else {
-                                if (log.isDebugEnabled())
-                                    log.debug(" create new");
-                                errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.new"));
-                            }
-                        }
-                        newAction = SAVE_ACTION;
-                    }
-                } else {
-                    errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
-                }
-            }
-            // delete dit record
-            if (buttonPressed(DELETE_BUTTON)) {
-                if (allowEdits) {
-                    if (directDelete) {
-                        ActionForward p = deleteAction();
-                        if (p!=null)
-                            return p;
-                    } else {
-                        if (theObject!=null) {
-                            if (log.isDebugEnabled())
-                                log.debug(" delete");
-                            errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.delete"));
-                            newAction = DELETE_ACTION;
-                        } else {
-                            if (log.isDebugEnabled())
-                                log.debug(" delete, but no record");
-                            errors.add(MAIN_MESSAGE, new ActionError("error.invoerenrecord.nodelete"));
-                        }
-                    }
-                } else {
-                    errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
-                }
-            }
-            // New, delete, join or disjoin voor gekoppelde objecten
-            if (theObject!=null) {
-                for (int subNum=1; subNum<=numOfSubs; subNum++) {
-                    Object subObject =(Object) subObjects.get(subNum-1);
-                    
-                    // creeer nieuw subrecord
-                    String subNewButton = SUBNEW_BUTTON + subNum;
-                    if (buttonPressed(subNewButton)) {
-                        if (allowEdits) {
-                            try {
-                                // merker dat record nieuw is, wordt later op gecheckt
-                                setSubID(subNum, Integer.toString(TEMPNEW_ID));
-                                subObject = getNewSubObject(subNum);
-                            } catch (B3pCommonsException me) {}
-                            subObjects.set(subNum-1, subObject );
-//                        errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subnew", getSubNames(subNum)));
-                            newAction = SUBEDIT_ACTION + subNum;
-                        } else {
-                            errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.notallowed"));
-                            newAction = EDIT_ACTION;
-                        }
-                    }
-                    // edit dit subrecord
-                    String subEditButton = SUBEDIT_BUTTON + subNum;
-                    if (buttonPressed(subEditButton)) {
-                        if (subObject!=null) {
-                            if (log.isDebugEnabled())
-                                log.debug(" edit subrecord");
-//                            errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subedit", getSubNames(subNum)));
-                            newAction = SUBDELETE_ACTION + subNum;
-                        } else {
-                            if (log.isDebugEnabled())
-                                log.debug(" edit subrecord, but no subrecord present");
-//                            errors.add(SUB_MESSAGE + subNum, new ActionError("error.invoerenrecord.nosubedit", getSubNames(subNum)));
-                        }
-                        newAction = SUBEDIT_ACTION + subNum;
-                    }
-                    
-                    // check of newjoin knop is gedrukt
-                    String newJoinButton = NEWJOIN_BUTTON + subNum;
-                    if (buttonPressed(newJoinButton) && subObject!=null) {
-                        if (allowEdits) {
-                            try {
-                                createJoin(subNum);
-                                if (log.isInfoEnabled())
-                                    log.info(" Aanmaken join tussen: " + theObject.toString() + " en: " + subObject.toString());
-                            } catch (Exception jdoe) {
-                                if (log.isErrorEnabled())
-                                    log.error(" Database error creating join: ", jdoe);
-                                errors.add(MAIN_MESSAGE, new ActionError("error.invoerenrecord.addjoin", new Integer(subNum), jdoe.getMessage()));
-                                return (mapping.findForward("failure"));
-                            }
-                        } else {
-                            errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
-                            newAction = EDIT_ACTION;
-                        }
-                    }
-                    // check of deletejoin knop is gedrukt
-                    String deleteJoinButton = DELETEJOIN_BUTTON + subNum;
-                    if (buttonPressed(deleteJoinButton) && subObject!=null) {
-                        if (allowEdits) {
-                            try {
-                                deleteJoin(subNum);
-                                if (log.isInfoEnabled())
-                                    log.info(" Verwijderen join tussen: " + theObject.toString() + " en: " + subObject.toString());
-                            } catch (Exception jdoe) {
-                                if (log.isErrorEnabled())
-                                    log.error(" Database error deleting join: ", jdoe);
-                                errors.add(MAIN_MESSAGE, new ActionError("error.invoerenrecord.deletejoin", new Integer(subNum), jdoe.getMessage()));
-                                return (mapping.findForward("failure"));
-                            }
-                        } else {
-                            errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
-                            newAction = EDIT_ACTION;
-                        }
-                    }
-                }
-            }
-            if (buttonPressed(CANCEL_BUTTON)) {
-                if (log.isInfoEnabled())
-                    log.info(" Cancel edit action????");
-                newAction = EDIT_ACTION;
-            }
-        }
-        return null;
-    }
-    
-    /**
-     * Deze functie zorgt ervoor dat een subrecord bewerkt kan worden.
-     * <p>
-     * @return niet null bij fouten
-     * @param subNum rangnummer formulier
-     * @param validateErrors foutenmeldingen van formulier
-     */
-    protected ActionForward doSubEditAction(int subNum, ActionErrors validateErrors) {
-        
-        Object subObject =(Object) subObjects.get(subNum-1);
-        
-        String subEditAction = SUBEDIT_ACTION + subNum;
-        // Bij subedit mode worden new en delete omgeleid met nieuwe action
-        if (isAction(subEditAction)) {
-            // Was this transaction a subSave?
-            String subSaveButton = SUBSAVE_BUTTON + subNum;
-            if (buttonPressed(subSaveButton)) {
-                if (allowEdits) {
-                    if (directSubSave) {
-                        ActionForward p = subSaveAction(subNum, validateErrors);
-                        if (p!=null)
-                            return p;
-                    } else {
-                        // validatie
-                        if (reduceSubErrors(subNum, validateErrors)) {
-                            if (log.isInfoEnabled())
-                                log.info("Validation error subform!");
-                            errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subsavewitherrors", getSubNames(subNum)));
-                        } else {
-                            if (subObject!=null) {
-                                if (log.isDebugEnabled())
-                                    log.debug(" subsave existing");
-                                errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subsave", getSubNames(subNum)));
-                            } else {
-                                if (log.isDebugEnabled())
-                                    log.debug(" create subnew");
-                                errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subnew", getSubNames(subNum)));
-                            }
-                        }
-                        newAction = SUBSAVE_ACTION +subNum;
-                    }
-                } else {
-                    errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.notallowed"));
-                }
-            }
-            
-            // creeer nieuw subrecord
-            String subNewButton = SUBNEW_BUTTON + subNum;
-            if (buttonPressed(subNewButton)) {
-                if (allowEdits) {
-                    try {
-                        // merker dat record nieuw is, wordt later op gecheckt
-                        setSubID(subNum, Integer.toString(TEMPNEW_ID));
-                        subObject = getNewSubObject(subNum);
-                    } catch (B3pCommonsException me) {}
-                    subObjects.set(subNum-1, subObject );
-//                        errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subnew", getSubNames(subNum)));
-                    newAction = SUBEDIT_ACTION + subNum;
-                } else {
-                    errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.notallowed"));
-                }
-            }
-            
-            // delete dit subrecord
-            String subDeleteButton = SUBDELETE_BUTTON + subNum;
-            if (buttonPressed(subDeleteButton)) {
-                if (allowEdits) {
-                    if (directSubDelete) {
-                        ActionForward p = subDeleteAction(subNum);
-                        if (p!=null)
-                            return p;
-                    } else {
-                        if (subObject!=null) {
-                            if (log.isDebugEnabled())
-                                log.debug(" delete subrecord");
-                            errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subdelete", getSubNames(subNum)));
-                            newAction = SUBDELETE_ACTION + subNum;
-                        } else {
-                            if (log.isDebugEnabled())
-                                log.debug(" delete subrecord, but no subrecord present");
-                            errors.add(SUB_MESSAGE + subNum, new ActionError("error.invoerenrecord.nosubdelete", getSubNames(subNum)));
-                            newAction = EDIT_ACTION;
-                        }
-                    }
-                } else {
-                    errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.notallowed"));
-                }
-            }
-            
-            // cancel of subedit
-            if (buttonPressed(CANCEL_BUTTON)) {
-                if (log.isInfoEnabled())
-                    log.info(" Cancel subedit action");
-                try {
-                    // Bij annuleren worden de velden dan gereset via nieuw subobject
-                    subObject = getNewSubObject(subNum);
-                    subObjects.set(subNum-1,  subObject);
-                    setSubID(subNum, "");
-                } catch (Exception dbe) {
-                    if (log.isErrorEnabled())
-                        log.error("  Database error creating object: ", dbe);
-                    errors.add(SUB_MESSAGE + subNum, new ActionError("error.database", dbe.getMessage()));
-                    return (mapping.findForward("failure"));
-                }
-                newAction = EDIT_ACTION;
-            }
-        }
-        return null;
-    }
-    
-    /**
-     * Deze functie controleert voor alle subrecords of er een gewist moet worden.
-     * <p>
-     * @return niet null bij fouten
-     * @param subNum rangnummer formulier
-     */
-    protected ActionForward doSubDeleteAction(int subNum) {
-        Object subObject =(Object) subObjects.get(subNum-1);
-        // Was this transaction a subDelete?
-        String subEditAction = SUBEDIT_ACTION + subNum;
-        String subDeleteAction = SUBDELETE_ACTION + subNum;
-        if (subDeleteAction.equals(action) && buttonPressed(OK_BUTTON) && subObject!=null) {
-            if (allowEdits) {
-                return subDeleteAction(subNum);
-            } else {
-                errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.notallowed"));
-                newAction = EDIT_ACTION;
-            }
-        }
-        if (subDeleteAction.equals(action) && buttonPressed(CANCEL_BUTTON)) {
-            if (log.isInfoEnabled())
-                log.info(" Cancel subdelete action");
-            try {
-                // Bij annuleren worden de velden dan gereset via nieuw subobject
-                subObject = getNewSubObject(subNum);
-                subObjects.set(subNum-1,  subObject);
-                setSubID(subNum, "");
-            } catch (Exception dbe) {
-                if (log.isErrorEnabled())
-                    log.error("  Database error creating object: ", dbe);
-                errors.add(SUB_MESSAGE + subNum, new ActionError("error.database", dbe.getMessage()));
-                return (mapping.findForward("failure"));
-            }
-            newAction = EDIT_ACTION;
-        }
-        return null;
-    }
-    
-    /**
-     * Deze functie wist een subrecord.
-     * <p>
-     * @return niet null bij fouten
-     * @param subNum rangnummer van formulier
-     */
-    protected ActionForward subDeleteAction(int subNum) {
-        Object subObject =(Object) subObjects.get(subNum-1);
-        if (log.isInfoEnabled())
-            log.info(" deleting subrecord '" + subObject.toString() + "'");
-        try {
-            deleteSubObject(subNum);
-            // HACK: door een leeg object door te geven wordt dit subformulier gewist
-            subObject = getNewSubObject(subNum);
-            subObjects.set(subNum-1, subObject );
-            setSubID(subNum, null);
-        } catch (B3pCommonsException dbe) {
-            if (log.isErrorEnabled())
-                log.error("  Database error deleting: ", dbe);
-            errors.add(SUB_MESSAGE + subNum, new ActionError("error.database", dbe.getMessage()));
-            return (mapping.findForward("failure"));
-        }
-        newAction = EDIT_ACTION;
-        
-        if (directSubDelete)
-            errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subdeletedone", getSubNames(subNum)));
-        
-        return null;
-    }
-    
-    /**
-     * Deze functie controleert voor alle subrecords of er een gesaved moet worden.
-     * <p>
-     * @return niet null bij fouten
-     * @param subNum rangnummer van formulier
-     * @param validateErrors foutenmeldingen van formulier
-     */
-    protected ActionForward doSubSaveAction(int subNum, ActionErrors validateErrors) {
-        Object subObject =(Object) subObjects.get(subNum-1);
-        String subSaveAction = SUBSAVE_ACTION + subNum;
-        if (subSaveAction.equals(action) && buttonPressed(OK_BUTTON)) {
-            if (allowEdits) {
-                return subSaveAction(subNum, validateErrors);
-            } else {
-                errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.notallowed"));
-                newAction = EDIT_ACTION;
-            }
-        }
-        if (subSaveAction.equals(action) && buttonPressed(CANCEL_BUTTON)) {
-            if (log.isInfoEnabled())
-                log.info(" Cancel subsave action");
-            try {
-                // Bij annuleren worden de velden dan gereset via nieuw subobject
-                subObject = getNewSubObject(subNum);
-                subObjects.set(subNum-1,  subObject);
-                setSubID(subNum, "");
-            } catch (Exception dbe) {
-                if (log.isErrorEnabled())
-                    log.error("  Database error creating object: ", dbe);
-                errors.add(SUB_MESSAGE + subNum, new ActionError("error.database", dbe.getMessage()));
-                return (mapping.findForward("failure"));
-            }
-            newAction = EDIT_ACTION;
-        }
-        return null;
-    }
     
     /**
      * Deze functie bewaart een subrecord.
@@ -951,35 +739,26 @@ public abstract class EditBaseBean extends FormBaseBean {
      * @param subNum rangnummer van formulier
      * @param validateErrors foutenmeldingen van formulier
      */
-    protected ActionForward subSaveAction(int subNum, ActionErrors validateErrors) {
+    protected ActionForward subSaveAction(int subNum, ActionErrors validateErrors) throws B3pCommonsException {
         Object subObject =(Object) subObjects.get(subNum-1);
         String subEditAction = SUBEDIT_ACTION + subNum;
         String subSaveAction = SUBSAVE_ACTION + subNum;
         // validatie
         if (reduceSubErrors(subNum, validateErrors)) {
-            if (log.isInfoEnabled())
-                log.info("Validation error subform!");
+            log.info("Validation error subform!");
             errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subsavewitherrors", getSubNames(subNum)));
             newAction = subSaveAction;
         } else {
-            try {
-                // Een nieuw subobject wordt alleen aangemaakt indien
-                // in het form een merker is aangebracht die dit aangeeft.
-                if (subObject == null && Integer.toString(TEMPNEW_ID).equals(getSubID(subNum))) {
-                    subObject = getNewSubObject(subNum);
-                    subObjects.set(subNum-1,  subObject);
-                }
-                if (subObject!=null) {
-                    if (log.isInfoEnabled())
-                        log.info(" Adding Subrecord " + subNum + " '" + subObject.toString() + "'");
-                    populateSubObject(subNum);
-                    syncSubID(subNum);
-                }
-            } catch (Exception dbe) {
-                if (log.isErrorEnabled())
-                    log.error("  Database error creating object: ", dbe);
-                errors.add(SUB_MESSAGE + subNum, new ActionError("error.database", dbe.getMessage()));
-                return (mapping.findForward("failure"));
+            // Een nieuw subobject wordt alleen aangemaakt indien
+            // in het form een merker is aangebracht die dit aangeeft.
+            if (subObject == null && Integer.toString(TEMPNEW_ID).equals(getSubID(subNum))) {
+                subObject = getNewSubObject(subNum);
+                subObjects.set(subNum-1,  subObject);
+            }
+            if (subObject!=null) {
+                log.info(" Adding Subrecord " + subNum + " '" + subObject.toString() + "'");
+                populateSubObject(subNum);
+                syncSubID(subNum);
             }
             if (returnAfterSubSave)
                 newAction = EDIT_ACTION;
@@ -992,34 +771,6 @@ public abstract class EditBaseBean extends FormBaseBean {
         return null;
     }
     
-    /**
-     * Deze functie checkt op de SAVE_ACTION moet worden uitgevoerd. Er wordt dan
-     * gecontroleerd of struts fouten in de invoer van het formulier heeft geconstateerd.
-     * Als dit zo is wordt verder verwerking afgebroken en gaat men meteen terug naar het
-     * formulier. Als er geen fouten zijn dan wordt de database gevuld met de informatie
-     * in het formulier.
-     * Dit is een alternatief voor de doSaveAction, waarbij alle subrecords ook worden
-     * gesaved.
-     * <p>
-     * @param validateErrors zoals deze door struts zijn vastgesteld
-     * @return niet null bij validatie errors
-     */
-    protected ActionForward doSaveAllAction(ActionErrors validateErrors) {
-        if (isAction(SAVE_ACTION) && buttonPressed(OK_BUTTON)) {
-            if (allowEdits) {
-                return saveAllAction(validateErrors);
-            } else {
-                errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
-                newAction = EDIT_ACTION;
-            }
-        }
-        if (isAction(SAVE_ACTION) && buttonPressed(CANCEL_BUTTON)) {
-            if (log.isInfoEnabled())
-                log.info(" Cancel save action");
-            newAction = EDIT_ACTION;
-        }
-        return null;
-    }
     
     /**
      * Deze functie bewaart het hoofdformulier met alle subformulieren. Er wordt dan
@@ -1033,46 +784,37 @@ public abstract class EditBaseBean extends FormBaseBean {
      * @param validateErrors zoals deze door struts zijn vastgesteld
      * @return niet null bij validatie errors
      */
-    protected ActionForward saveAllAction(ActionErrors validateErrors) {
+    protected ActionForward saveAllAction(ActionErrors validateErrors) throws B3pCommonsException {
         // validatie
         if (validateErrors!=null && !validateErrors.isEmpty()) {
-            if (log.isInfoEnabled())
-                log.info("Validation error!");
+            log.info("Validation error!");
             errors.add(validateErrors);
-            return (mapping.findForward("success"));
+            return null;
         }
-        try {
-            // Het hoofdobject wordt alleen aangemaakt, indien
-            // in het form een merker is aangebracht die dit aangeeft.
-            if (theObject == null && Integer.toString(TEMPNEW_ID).equals(getMainID())) {
-                theObject = getNewObject();
-                subObjects = new ArrayList();
-            }
-            if (theObject!=null) {
-                populateObject();
-                syncID();
-                int numOfSubs = subObjects.size();
-                for (int subNum=1; subNum<=numOfSubs; subNum++) {
-                    Object subObject =(Object) subObjects.get(subNum-1);
-                    // Een nieuw subobject wordt alleen aangemaakt indien
-                    // in het form een merker is aangebracht die dit aangeeft.
-                    if (subObject == null && Integer.toString(TEMPNEW_ID).equals(getSubID(subNum))) {
-                        subObject = getNewSubObject(subNum);
-                        subObjects.set(subNum-1,  subObject);
-                    }
-                    if (subObject!=null) {
-                        populateSubObject(subNum);
-                        syncSubID(subNum);
-                    }
+        // Het hoofdobject wordt alleen aangemaakt, indien
+        // in het form een merker is aangebracht die dit aangeeft.
+        if (theObject == null && Integer.toString(TEMPNEW_ID).equals(getMainID())) {
+            theObject = getNewObject();
+            subObjects = new ArrayList();
+        }
+        if (theObject!=null) {
+            populateObject();
+            syncID();
+            int numOfSubs = subObjects.size();
+            for (int subNum=1; subNum<=numOfSubs; subNum++) {
+                Object subObject =(Object) subObjects.get(subNum-1);
+                // Een nieuw subobject wordt alleen aangemaakt indien
+                // in het form een merker is aangebracht die dit aangeeft.
+                if (subObject == null && Integer.toString(TEMPNEW_ID).equals(getSubID(subNum))) {
+                    subObject = getNewSubObject(subNum);
+                    subObjects.set(subNum-1,  subObject);
                 }
-                if (log.isDebugEnabled())
-                    log.debug(" Populating database object and subobjects from form bean");
+                if (subObject!=null) {
+                    populateSubObject(subNum);
+                    syncSubID(subNum);
+                }
             }
-        } catch (Exception dbe) {
-            if (log.isErrorEnabled())
-                log.error("  Database error creating object: ", dbe);
-            errors.add(MAIN_MESSAGE, new ActionError("error.database", dbe.getMessage()));
-            return (mapping.findForward("failure"));
+            log.debug(" Populating database object and subobjects from form bean");
         }
         newAction = EDIT_ACTION;
         
@@ -1088,20 +830,13 @@ public abstract class EditBaseBean extends FormBaseBean {
      * <p>
      * @return niet null bij fouten
      */
-    protected ActionForward populateMainForm() {
+    protected ActionForward populateMainForm() throws B3pCommonsException {
         if (theObject==null)
             return null;
-        try {
-            // Bij save action moet het form niet opnieuw gevuld worden
-            
-            if (!isNewAction(SAVE_ACTION)) {
-                populateForm();
-                if (log.isDebugEnabled())
-                    log.debug(" Populating form from " + theObject.toString());
-            }
-        } catch (B3pCommonsException pe) {
-            errors.add(MAIN_MESSAGE, new ActionError("error.invoerenrecord.general"));
-            return mapping.findForward("failure");
+        // Bij save action moet het form niet opnieuw gevuld worden
+        if (!isNewAction(SAVE_ACTION)) {
+            populateForm();
+            log.debug(" Populating form from " + theObject.toString());
         }
         return null;
     }
@@ -1112,21 +847,15 @@ public abstract class EditBaseBean extends FormBaseBean {
      * <p>
      * @return niet null bij fouten
      */
-    protected ActionForward populateSubForms(int subNum) {
+    protected ActionForward populateSubForms(int subNum) throws B3pCommonsException {
         Object subObject =(Object) subObjects.get(subNum-1);
         if (subObject==null)
             return null;
         String subSaveAction = SUBSAVE_ACTION + subNum;
-        try {
-            // Bij subsave action moet het subform niet opnieuw gevuld worden
-            if (!isNewAction(subSaveAction)) {
-                populateSubForm(subNum);
-                if (log.isDebugEnabled())
-                    log.debug(" Populating subform from " + subObject.toString());
-            }
-        } catch (B3pCommonsException pe) {
-            errors.add(SUB_MESSAGE + subNum, new ActionError("error.invoerenrecord.general"));
-            return mapping.findForward("failure");
+        // Bij subsave action moet het subform niet opnieuw gevuld worden
+        if (!isNewAction(subSaveAction)) {
+            populateSubForm(subNum);
+            log.debug(" Populating subform from " + subObject.toString());
         }
         return null;
     }
@@ -1192,12 +921,8 @@ public abstract class EditBaseBean extends FormBaseBean {
      * <p>
      * @return niet null bij fouten
      */
-    protected void determineNewAction() {
-        try {
-            setForm("action", newAction);
-        } catch (B3pCommonsException pe) {
-            errors.add(MAIN_MESSAGE, new ActionError("error.invoerenrecord.general"));
-        }
+    protected void determineNewAction() throws B3pCommonsException {
+        setForm("action", newAction);
         return;
     }
     
