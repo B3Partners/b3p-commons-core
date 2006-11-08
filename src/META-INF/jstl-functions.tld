@@ -10,6 +10,12 @@
         <function-class>java.lang.Math</function-class>
         <function-signature>double ceil(double)</function-signature>
     </function>
+    
+    <function>
+        <name>abs</name>
+        <function-class>java.lang.Math</function-class>
+        <function-signature>double abs(double)</function-signature>
+    </function>
   
     <function>
         <name>urlEncode</name>
