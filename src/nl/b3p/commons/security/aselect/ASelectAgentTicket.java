@@ -50,7 +50,7 @@ public class ASelectAgentTicket extends ASelectTicket implements ASelectConstant
              */
             if(ASELECT_AGENT_TICKET_UNKNOWN.equals(asResult)
             || ASELECT_AGENT_TICKET_EXPIRED.equals(asResult)) {
-                throw new ASelectAuthorizationException("Ticket expired or onknown");
+                throw new ASelectAuthorizationException("Ticket expired or unknown");
             } 
             if(ASELECT_AGENT_TICKET_INVALID.equals(asResult)) {
                 throw new ASelectAuthorizationException("Invalid ticket");
