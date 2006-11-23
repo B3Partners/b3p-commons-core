@@ -54,6 +54,11 @@ import org.apache.commons.logging.LogFactory;
  *      Moet nog aan gewerkt worden.
  *   </li>
  * <p>
+ * Dit filter plaatst de volgende keys in de log4j Mapped Diagnostic Context 
+ * (MDC):
+ * ASelectUid
+ * ASelectTicket
+ * <p>
  * TODO impl api webserver-filter, server<br>
  * TODO impl error_page<br>
  * TODO error messages uit resource files
@@ -177,6 +182,9 @@ public class ASelectAuthorizationFilter implements Filter, ASelectConstants {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
     throws IOException, ServletException {
 
+        org.apache.log4j.MDC.remove("ASelectUid");
+        org.apache.log4j.MDC.remove("ASelectTicket");
+        
         if(!configOK) {
             throw new ServletException("Invalid filter configuration");
         }
@@ -279,6 +287,9 @@ public class ASelectAuthorizationFilter implements Filter, ASelectConstants {
             } catch(IOException e) {
                 throw new ServletException("Error verifying ticket", e);
             }
+            
+            org.apache.log4j.MDC.put("ASelectUid", ticket.getUid());
+            org.apache.log4j.MDC.put("ASelectTicket", ticket.getTicketId());
 
             return true;
         }
