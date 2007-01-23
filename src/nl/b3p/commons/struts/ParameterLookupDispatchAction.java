@@ -81,43 +81,22 @@ import org.apache.struts.actions.DispatchAction;
  * </pre>
  * </code>
  */
-public abstract class ParameterLookupDispatchAction extends DynaFormDispatchAction {
+public abstract class ParameterLookupDispatchAction extends UrlPathDispatchAction {
     
-    private static final String DISPATCHED_PARAMETER = ParameterLookupDispatchAction.class.getName() + ".DISPATCHED_PARAMETER";
-    private static final String DISPATCHED_METHOD_NAME = ParameterLookupDispatchAction.class.getName() + ".DISPATCHED_METHOD_NAME";
-    
-    /** Mapping van parameter naar methode naam
-     */
-    /* Initialiseer deze met lege HashMap zodat op de monitor ervan kan worden gesynchronized */
-    protected Map parameterMethodMap = new HashMap();
-    
-    
-    protected abstract Map getParameterMethodMap();
     
     public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
         
-        if(isCancelled(request)) {
-            ActionForward af = cancelled(mapping, form, request, response);
-            if(af != null) {
-                return af;
-            }
-        }
+        ActionForward af = super.execute(mapping, form, request, response);
         
-        String methodParameter = getMethodParameter(mapping, form, request, response);
-        
-        /* dispatchMethod() zal unspecified() aanroepen indien methodName null is */
-        String methodName = setDispatchMethod(methodParameter, request);
-        
-        ActionForward af = dispatchMethod(mapping, form, request, response, methodName);
-        
-                /* Indien het form een DynaActionForm is en het form heeft een String
-                 * property met de naam van de parameter die is gesubmit, zet deze
-                 * property dan naar een lege String. Dit voor het kunnen submitten dmv
-                 * JavaScript met een hidden property. Indien je de property niet
-                 * leegmaakt wordt de methode voor de JavaScript submit bij een volgende
-                 * submit met een andere knop mogelijk weer uitgevoerd in plaats van de
-                 * juiste knop.
-                 */
+        /* Indien het form een DynaActionForm is en het form heeft een String
+         * property met de naam van de parameter die is gesubmit, zet deze
+         * property dan naar een lege String. Dit voor het kunnen submitten dmv
+         * JavaScript met een hidden property. Indien je de property niet
+         * leegmaakt wordt de methode voor de JavaScript submit bij een volgende
+         * submit met een andere knop mogelijk weer uitgevoerd in plaats van de
+         * juiste knop.
+         */
+        String methodParameter = getDispatchedParameter(request);
         if(methodParameter != null && form instanceof DynaActionForm) {
             DynaActionForm dynaForm = (DynaActionForm)form;
             Object formPropertyValue = dynaForm.getMap().get(methodParameter);
@@ -129,66 +108,30 @@ public abstract class ParameterLookupDispatchAction extends DynaFormDispatchActi
         return af;
     }
     
-    /**
-     * Plaatst de parameter en de methode op de request, protected om subklassen
-     * de gelegenheid te geven dit aan te passen.
-     */
-    protected String setDispatchMethod(String methodParameter, HttpServletRequest request) {
-        String methodName = null;
-        if(methodParameter != null) {
-            methodName = (String)parameterMethodMap.get(methodParameter);
-        }
-        request.setAttribute(DISPATCHED_PARAMETER, methodParameter);
-        request.setAttribute(DISPATCHED_METHOD_NAME, methodName);
-        return methodName;
-    }
-    
-    /**
-     * Geeft de naam van de methode waarnaar is gedispatcht of null indien het
-     * request cancelled is of de methode unspecified is.
-     */
-    protected String getDispatchedMethodName(HttpServletRequest request) {
-        return (String)request.getAttribute(DISPATCHED_METHOD_NAME);
-    }
-    
-    /**
-     * Geeft de naam van de request parameter die gebruikt is om de methode
-     * op te zoeken waarnaar te dispatchen of null indien cancelled of
-     * unspecified.
-     */
-    protected String getDispatchedParameter(HttpServletRequest request) {
-        return (String)request.getAttribute(DISPATCHED_PARAMETER);
-    }
     
     protected String getMethodParameter(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) {
-                /* Kijk of er niet-lege parameters zijn die in de parameterMethodMap
-                 * keyset voorkomen. Dit is het geval indien een submit knop is
-                 * ingedrukt (of door JavaScript een form is gesubmit).
-                 */
+        /* eerst kijken of hiervoor al een methode in de url of elders gevonden is
+         * zo niet dan in de request parameters kijken
+         */
+        String parameter = super.getMethodParameter(mapping, form, request, response);
         
-                /* Check met lock op parameterMethodMap indien deze leeg is en zo ja
-                 * initialiseer deze. Lezen kan zonder lock
-                 */
-        synchronized(parameterMethodMap) {
-            if(parameterMethodMap.isEmpty()) {
-                Map realizedParameterMethodMap = getParameterMethodMap();
-                if(realizedParameterMethodMap == null || realizedParameterMethodMap.isEmpty()) {
-                    throw new IllegalStateException("empty parameterMethodMap");
+        if (parameter==null) {
+            /* Kijk of er niet-lege parameters zijn die in de parameterMethodMap
+             * keyset voorkomen. Dit is het geval indien een submit knop is
+             * ingedrukt (of door JavaScript een form is gesubmit).
+             */
+            
+            Set keys = parameterMethodMap.keySet();
+            for(Iterator i = keys.iterator(); i.hasNext();) {
+                String key = (String)i.next();
+                String keyParam = request.getParameter(key);
+                if(keyParam != null && keyParam.length() > 0) {
+                    parameter = key;
+                    break;
                 }
-                parameterMethodMap.putAll(realizedParameterMethodMap);
             }
         }
         
-        String parameter = null;
-        Set keys = parameterMethodMap.keySet();
-        for(Iterator i = keys.iterator(); i.hasNext();) {
-            String key = (String)i.next();
-            String keyParam = request.getParameter(key);
-            if(keyParam != null && keyParam.length() > 0) {
-                parameter = key;
-                break;
-            }
-        }
         return parameter;
     }
 }
