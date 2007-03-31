@@ -38,7 +38,6 @@ public abstract class UrlPathDispatchAction extends DynaFormDispatchAction {
     
     private static final String DISPATCHED_PARAMETER = UrlPathDispatchAction.class.getName() + ".DISPATCHED_PARAMETER";
     private static final String DISPATCHED_METHOD_NAME = UrlPathDispatchAction.class.getName() + ".DISPATCHED_METHOD_NAME";
-    private static final String URL_PATH_ARRAY = UrlPathDispatchAction.class.getName() + ".URL_PATH_ARRAY";
     
     /** Mapping van parameter naar methode naam
      */
@@ -103,14 +102,6 @@ public abstract class UrlPathDispatchAction extends DynaFormDispatchAction {
         return (String)request.getAttribute(DISPATCHED_PARAMETER);
     }
     
-    /**
-     * Geeft de naam van de request parameter die gebruikt is om de string
-     * array op te zoeken welke uit de pathinfo van de url is opgebouwd.
-     */
-    protected String[] getUrlPathArray(HttpServletRequest request) {
-        return (String[])request.getAttribute(URL_PATH_ARRAY);
-    }
-    
     protected String getMethodParameter(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) {
         /* Check met lock op parameterMethodMap indien deze leeg is en zo ja
          * initialiseer deze. Lezen kan zonder lock
@@ -125,18 +116,7 @@ public abstract class UrlPathDispatchAction extends DynaFormDispatchAction {
             }
         }
         
-        String[] pathInfo = null;
-        String pi = mapping.getParameter();
-        if (pi==null || pi.length()==0)
-            return null;
-        
-        if (pi.indexOf("/")==0) {
-            pathInfo = pi.substring(1).split("/");
-        } else {
-            pathInfo = pi.split("/");
-        }
-        request.setAttribute(URL_PATH_ARRAY, pathInfo);
-        
+        String[] pathInfo = parseParameter(mapping, request);
         int methodPathIndex = getMethodPathIndex();
         String methodParameter = null;
         if (pathInfo!=null && methodPathIndex>=0 && pathInfo.length>methodPathIndex)
@@ -150,6 +130,20 @@ public abstract class UrlPathDispatchAction extends DynaFormDispatchAction {
             return methodParameter;
         
         return null;
+    }
+    
+    protected String[] parseParameter(ActionMapping mapping, HttpServletRequest request) {
+        String[] pathInfo = null;
+        String pi = mapping.getParameter();
+        if (pi==null || pi.length()==0)
+            return null;
+        
+        if (pi.indexOf("/")==0) {
+            pathInfo = pi.substring(1).split("/");
+        } else {
+            pathInfo = pi.split("/");
+        }
+        return pathInfo;
     }
     
 }

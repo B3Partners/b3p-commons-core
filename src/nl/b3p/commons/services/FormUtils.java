@@ -159,6 +159,14 @@ public final class FormUtils {
         }
     }
     
+    public static Long StringToLong(String thisstring) {
+        try {
+            return new Long(thisstring);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+    
     public static Short StringToShort(String thisstring) {
         try {
             return new Short(thisstring);
@@ -172,6 +180,13 @@ public final class FormUtils {
             return "";
         else
             return thisint.toString();
+    }
+    
+    public static String LongToString(Long thislong) {
+        if (thislong==null)
+            return "";
+        else
+            return thislong.toString();
     }
     
     public static String ShortToString(Short thisshort) {
