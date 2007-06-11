@@ -24,7 +24,7 @@ public abstract class ExtendedMethodAction extends MethodPropertiesAction {
     
     protected ActionForward getUnspecifiedAlternateForward(ActionMapping mapping, HttpServletRequest request) {
         ActionForward af = mapping.getInputForward();
-        if (af!=null)
+        if (af!=null && af.getPath()!=null)
             return af;
         return getUnspecifiedDefaultForward(mapping, request);
     }
