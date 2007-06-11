@@ -28,4 +28,10 @@
         <function-class>nl.b3p.commons.taglib.JstlFunctionSupport</function-class>
         <function-signature>boolean isUserInRole(javax.servlet.http.HttpServletRequest, java.lang.String)</function-signature>
     </function>
+    
+    <function>
+        <name>contains</name>
+        <function-class>nl.b3p.commons.taglib.JstlFunctionSupport</function-class>
+        <function-signature>boolean contains(java.util.Set, java.lang.Object)</function-signature>
+    </function>
 </taglib>
