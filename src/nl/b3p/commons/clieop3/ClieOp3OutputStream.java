@@ -65,33 +65,6 @@ public class ClieOp3OutputStream {
         writer.write('\n');
     }
 
-    /* XXX dit vereist de Normalizer class uit de sun.* hierarchie. Echter in
-     * Java 1.6 zal deze wel beschikbaar zijn in java.text.Normalizer.
-     *
-     * Alternatief zou zijn ICU4J.
-     */
-
-    private static Class normalizerClass;
-    private static boolean normalizerInitialized = false;
-
-    public static String removeAccents(String text) {
-        if(!normalizerInitialized) {
-            try {
-                normalizerClass = Class.forName("sun.text.Normalizer");
-                log.debug("using sun.text.Normalizer class for normalization");
-            } catch(ClassNotFoundException e) {
-                log.warn("class sun.text.Normalizer not found, no normalization used");
-            }
-            normalizerInitialized = true;
-        }
-        if(normalizerClass != null) {
-            return sun.text.Normalizer.decompose(text, false, 0)
-                .replaceAll("\\p{InCombiningDiacriticalMarks}", "");
-        } else {
-            return text;
-        }
-    }
-
     private static final String allowed = " .()+&$*:;-/,%?@='\"";
 
     public static String replaceForbiddenChars(String text) {
@@ -110,7 +83,7 @@ public class ClieOp3OutputStream {
     }
 
     public static String cleanClieOp3String(String str) {
-        return replaceForbiddenChars(removeAccents(str));
+        return replaceForbiddenChars(str);
     }
 
     public void endBestand() throws IOException {
@@ -197,7 +170,7 @@ public class ClieOp3OutputStream {
         if(naamBegunstigde != null) {
             writeRecord(naamBegunstigde);
         }
-        
+
         if(woonplaatsBegunstigde != null) {
             writeRecord(woonplaatsBegunstigde);
         }
@@ -224,26 +197,8 @@ public class ClieOp3OutputStream {
         return result;
     }
 
-    /* TODO omschrijven naar JUnit tests */
-    public static void testRemoveAccents() {
-        System.out.println(removeAccents("hoi"));
-        System.out.println(removeAccents("hé"));
-        System.out.println(removeAccents("O÷éç÷øs ÄörtjeStichting KèlszittingStichting BethaniëD'n MäölenhookStichting Varkensvlees Lekker HèStichting Weert-Haïti\n" +
-            "Vélo l'EaulooStichting Ziekentriduüm Tegelen/BelfeldStichting 'D'n Speulbóngerd' SwolgenStg. Vrunj v. Sjötterie St. Urbanus 'Neel'\n" +
-            "Ônger De PanneSpaarkas de GaaspièpStg. A.K. van Aand. in Menten-Tubée Beh. B.V.Stg. Christophorus Foundat. l'Viv, Oekraïne\n" +
-            "Stichting 't Tienders KräntjeJoekskapel 'Angesóm'Part aux BénéficesStichting TürkiyemStichting Administratiekantoor Özelli\n" +
-            "Véloklub 'Sèrum' 1971"
-        ));
-    }
-
-    public static void testReplaceForbidden() {
-        System.out.println(replaceForbiddenChars("`~!@#$%^&*()-=_+[]é{};\"'\\|'/?.>,<"));
-    }
-
-    /* TODO omschrijven naar JUnit tests */
+/*
     public static void main(String[] args) throws Exception {
-        testRemoveAccents();
-        testReplaceForbidden();
 
         ClieOp3OutputStream clieop = new ClieOp3OutputStream(
             System.out,
@@ -287,4 +242,5 @@ public class ClieOp3OutputStream {
 
         clieop.endBestand();
     }
+*/
 }
