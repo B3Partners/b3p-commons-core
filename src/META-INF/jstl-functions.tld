@@ -34,4 +34,10 @@
         <function-class>nl.b3p.commons.taglib.JstlFunctionSupport</function-class>
         <function-signature>boolean contains(java.util.Set, java.lang.Object)</function-signature>
     </function>
+
+    <function>
+        <name>containsKey</name>
+        <function-class>nl.b3p.commons.taglib.JstlFunctionSupport</function-class>
+        <function-signature>boolean containsKey(java.util.Map, java.lang.Object)</function-signature>
+    </function>
 </taglib>
