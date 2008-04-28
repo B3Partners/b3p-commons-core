@@ -17,10 +17,22 @@ public class JstlFunctionSupport {
     }    
     
     public static boolean contains(Set set, Object object) {
+        /* NPE indien set null is is semantisch juist, maar in JSP waarschijnlijk
+         * niet gewenst en is false returnen "beter"
+         */
+        if(set == null) {
+            return false;
+        }
         return set.contains(object);
     }
     
     public static boolean containsKey(Map map, Object object) {
+        /* NPE indien map null is is semantisch juist, maar in JSP waarschijnlijk
+         * niet gewenst en is false returnen "beter"
+         */
+        if(map == null) {
+            return false;
+        }
         return map.containsKey(object);
     }
 }
