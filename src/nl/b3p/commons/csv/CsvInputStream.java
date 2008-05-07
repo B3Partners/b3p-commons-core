@@ -56,7 +56,7 @@ public class CsvInputStream {
      * checkColumnCount enabled en het record niet evenveel kolommen heeft als
      * het eerste record.
      */
-    public String[] readRecord() throws IOException, CsvFormatException {
+    public List readRecordAsList() throws IOException, CsvFormatException {
         
         List fields = new ArrayList(columnCount == -1 ? 10 : columnCount);
         int columns = 0;
@@ -87,6 +87,11 @@ public class CsvInputStream {
             }
         }
         recordNumber++;
+        return fields;
+    }
+    
+    public String[] readRecord() throws IOException, CsvFormatException {
+        List fields = readRecordAsList();
         return (String[])fields.toArray(new String[] {});
     }
         
