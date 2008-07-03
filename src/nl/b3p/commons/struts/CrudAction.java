@@ -54,11 +54,15 @@ public class CrudAction extends ExtendedMethodAction {
         crudProp = new ExtendedMethodProperties(DELETE_CONFIRM);
         crudProp.setDefaultForwardName(SUCCESS);
         crudProp.setDefaultMessageKey("warning.crud.delete");
+        crudProp.setAlternateForwardName(SUCCESS);
+        crudProp.setAlternateMessageKey("message.crud.delete");
         map.put(DELETE_CONFIRM, crudProp);
         
         crudProp = new ExtendedMethodProperties(SAVE_CONFIRM);
         crudProp.setDefaultForwardName(SUCCESS); // Na saveConfirm forward naar success
         crudProp.setDefaultMessageKey("warning.crud.save");
+        crudProp.setAlternateForwardName(SUCCESS);
+        crudProp.setAlternateMessageKey("message.crud.save");
         map.put(SAVE_CONFIRM, crudProp);
         
         crudProp = new ExtendedMethodProperties(DELETE);

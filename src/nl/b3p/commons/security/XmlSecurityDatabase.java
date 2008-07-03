@@ -33,6 +33,7 @@ public class XmlSecurityDatabase extends HttpServlet {
     private static Hashtable userpasswords = null;
     private static Hashtable userroles = null;
     private static int maxNumOfSessions = 0;
+    private static boolean initialized = false;
     
     /** Initializes the servlet.
      */
@@ -64,7 +65,7 @@ public class XmlSecurityDatabase extends HttpServlet {
         }
         
         // Omzetten in gemakkelijk uitleesbare objecten
-        if (securityDatabase!=null) {
+        if (securityDatabase!=null && log!=null) {
             if (log.isDebugEnabled())
                 log.debug("Xml Database is not null.");
             maxNumOfSessions = securityDatabase.getMaxsessions();
@@ -105,9 +106,12 @@ public class XmlSecurityDatabase extends HttpServlet {
                     userroles.put(aUser.getUsername(), roleList);
                 }
             }
+            initialized = true;
+            if (log.isInfoEnabled())
+                log.info("Initializing Xml Security Database servlet");
+        } else {
+            System.out.println("XML Security Database servlet not initialized!");
         }
-        if (log.isInfoEnabled())
-            log.info("Initializing Xml Security Database servlet");
         
     }
     
@@ -150,6 +154,8 @@ public class XmlSecurityDatabase extends HttpServlet {
     }
     
     public static boolean booleanAuthenticate(String username, String password) {
+        if (!isInitialized())
+            return false;
         if (log.isDebugEnabled())
             log.debug("Trying to login: " + username + " with password: " + password);
         int nos = SessionCounter.getActiveSessions();
@@ -168,6 +174,8 @@ public class XmlSecurityDatabase extends HttpServlet {
     }
     
     public static boolean isUserInRole(String username, String role) {
+        if (!isInitialized())
+            return false;
         if (log.isDebugEnabled())
             log.debug("Checking role: " + role + " for user: " + username);
         int nos = SessionCounter.getActiveSessions();
@@ -198,10 +206,15 @@ public class XmlSecurityDatabase extends HttpServlet {
         return (securityDatabase);
     }
     
+    public static boolean isInitialized() {
+        return initialized;
+    }
+    
     /** Returns a short description of the servlet.
      */
     public String getServletInfo() {
         return "XML Security Database servlet";
     }
+    
     
 }
