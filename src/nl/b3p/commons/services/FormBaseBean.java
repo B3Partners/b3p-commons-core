@@ -1,10 +1,27 @@
 /*
- * FormBaseBean.java
+ * B3P Commons Core is a library with commonly used classes for webapps.
+ * Included are clieop3, oai, security, struts, taglibs and other
+ * general helper classes and extensions.
  *
- * Created on 3 april 2005, 16:07
+ * Copyright 2000 - 2008 B3Partners BV
+ * 
+ * This file is part of B3P Commons Core.
+ * 
+ * B3P Commons Core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * B3P Commons Core is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with B3P Commons Core.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package nl.b3p.commons.services;
+
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
@@ -30,13 +47,10 @@ import org.apache.struts.validator.DynaValidatorForm;
  * @author <a href="chrisvanlith@b3partners.nl">Chris van Lith</a>
  * @version $Revision: 1.0 $ $Date: 2005/05/17 12:48:31 $
  */
-
 public abstract class FormBaseBean {
-    
+
     protected Log log = LogFactory.getLog(this.getClass());
-    
     protected String action = null;
-    
     protected ActionMessages errors = null;
     protected HttpSession session = null;
     protected HttpServletRequest request = null;
@@ -46,11 +60,9 @@ public abstract class FormBaseBean {
     protected DynaValidatorForm form = null;
     protected Map requestParams = null;
     protected ActionMapping mapping = null;
-    
     protected boolean isInit = false;
-    
     public static final String UNKNOWN_ACTION = "Unknown";
-    
+
     /**
      * Deze minimale constructor kent geen locale instelling, geen
      * message resources en geen foutterugmelding en zal niet vaak
@@ -65,7 +77,7 @@ public abstract class FormBaseBean {
             ActionMapping mapp) {
         this(req, null, null, null, dform, mapp);
     }
-    
+
     /**
      * De constructor bepaalt uit de request de parameters welke gepost zijn en slaat deze
      * lokaal op. Hiernaast wordt het struts formulier zelf lokaal opgeslagen.
@@ -86,10 +98,10 @@ public abstract class FormBaseBean {
             ActionMessages err,
             DynaValidatorForm dform,
             ActionMapping mapp) {
-        
+
         this.request = req;
         this.session = req.getSession();
-        
+
         if (req instanceof MultipartRequestWrapper) {
             MultipartRequestWrapper mpr = (MultipartRequestWrapper) req;
             Enumeration mprenum = mpr.getParameterNames();
@@ -99,27 +111,29 @@ public abstract class FormBaseBean {
                 tempMap.put(param, mpr.getParameter(param));
             }
             this.requestParams = tempMap;
-        } else
+        } else {
             this.requestParams = new HashMap(req.getParameterMap());
-        
+        }
         this.locale = loc;
         this.messages = mess;
         this.errors = err;
         this.form = dform;
         this.mapping = mapp;
-        
-        if (this.errors==null)
+
+        if (this.errors == null) {
             this.errors = new ActionErrors();
-        if (this.locale==null)
+        }
+        if (this.locale == null) {
             this.locale = Locale.getDefault();
-        if (this.messages==null)
+        }
+        if (this.messages == null) {
             this.messages = MessageResources.getMessageResources("nl.b3p.commons.services.FormBaseStrings");
-        
+        }
         this.setAction(UNKNOWN_ACTION);
-        
-        this.isInit=true;
+
+        this.isInit = true;
     }
-    
+
     /**
      * getter voor action
      * @return geeft de huidige actie
@@ -127,7 +141,7 @@ public abstract class FormBaseBean {
     public String getAction() {
         return action;
     }
-    
+
     /**
      * setter voor action
      * @param action zet een nieuwe actie
@@ -135,18 +149,19 @@ public abstract class FormBaseBean {
     protected void setAction(String action) {
         this.action = action;
     }
-    
+
     /**
      * test of een actie de huidige actie is
      * @param lact te testen actie
      * @return true indien huidige actie gelijk is aan de te testen actie
      */
     protected boolean isAction(String lact) {
-        if (lact==null)
+        if (lact == null) {
             return false;
+        }
         return lact.equals(getAction());
     }
-    
+
     /**
      * gemaksfunctie die test of een knop met een bepaalde waarde in de request voorkomt en
      * een waarde heeft; hiermee wordt vastgesteld dat deze knop geklikt is.
@@ -155,24 +170,26 @@ public abstract class FormBaseBean {
      * @return true indien de knop geklikt is
      */
     protected boolean buttonPressed(String butt) {
-        if (butt==null)
+        if (butt == null) {
             return false;
+        }
         String butval = null;
         try {
             butval = getParamAsString(butt);
-        } catch (B3pCommonsException be) {}
+        } catch (B3pCommonsException be) {
+        }
         return !nullOrEmpty(butval);
     }
-    
+
     /**
      * gemaksfunctie die test of een string niet null of leeg is.
      * @param astr te testen string
      * @return true indien leeg of null
      */
     protected static boolean nullOrEmpty(String astr) {
-        return (astr == null || astr.length()==0);
+        return (astr == null || astr.length() == 0);
     }
-    
+
     /**
      * De parameters uit de request zijn opgenomen tijdens de constructie van de class in een Map.
      * Deze functie haalt de waarde op van een bepaalde parameter. Indien de parameter meerdere
@@ -183,20 +200,23 @@ public abstract class FormBaseBean {
      */
     protected String getParamAsString(String param) throws B3pCommonsException {
         Object value = getParamAsObject(param);
-        if (value==null)
+        if (value == null) {
             return null;
-        if (value instanceof String)
+        }
+        if (value instanceof String) {
             return (String) value;
+        }
         if (value instanceof String[]) {
             String[] sa = (String[]) value;
-            if (sa.length>0)
+            if (sa.length > 0) {
                 return sa[0];
-            else
+            } else {
                 return null;
+            }
         }
-        throw new B3pCommonsException("Verkeerde functie aanroep: getParamAsString bij param: " + (param==null?"?":param));
+        throw new B3pCommonsException("Verkeerde functie aanroep: getParamAsString bij param: " + (param == null ? "?" : param));
     }
-    
+
     /**
      * De parameters uit de request zijn opgenomen tijdens de constructie van de class in een Map.
      * Deze functie haalt de waarde op van een bepaalde parameter. Normaal betreft het een String
@@ -207,11 +227,12 @@ public abstract class FormBaseBean {
      */
     protected String[] getParamAsStringArray(String param) throws B3pCommonsException {
         Object value = getParamAsObject(param);
-        if (!(value instanceof String[]) && value!=null)
-            throw new B3pCommonsException("Verkeerde functie aanroep: getParamAsStringArray bij param: " + (param==null?"?":param));
+        if (!(value instanceof String[]) && value != null) {
+            throw new B3pCommonsException("Verkeerde functie aanroep: getParamAsStringArray bij param: " + (param == null ? "?" : param));
+        }
         return (String[]) value;
     }
-    
+
     /**
      * De parameters uit de request zijn opgenomen tijdens de constructie van de class in een Map.
      * Deze functie haalt de waarde op van een bepaalde parameter.
@@ -222,7 +243,7 @@ public abstract class FormBaseBean {
     protected Object getParamAsObject(String param) {
         return requestParams.get(param);
     }
-    
+
     /**
      *
      * Deze gemaksfunctie haalt een waarde voor een formulierveld op en cast deze naar een String.
@@ -238,11 +259,12 @@ public abstract class FormBaseBean {
      */
     protected String getForm(String param) throws B3pCommonsException {
         Object obj = getFormAsObject(param);
-        if (!(obj instanceof String) && obj!=null)
-            throw new B3pCommonsException("Verkeerde functie aanroep: getForm bij param: " + (param==null?"?":param));
+        if (!(obj instanceof String) && obj != null) {
+            throw new B3pCommonsException("Verkeerde functie aanroep: getForm bij param: " + (param == null ? "?" : param));
+        }
         return (String) obj;
     }
-    
+
     /**
      *
      * Deze gemaksfunctie haalt een waarde voor een formulierveld op en cast deze naar een String Array.
@@ -258,11 +280,12 @@ public abstract class FormBaseBean {
      */
     protected String[] getFormAsStringArray(String param) throws B3pCommonsException {
         Object obj = getFormAsObject(param);
-        if (!(obj instanceof String[]) && obj!=null)
-            throw new B3pCommonsException("Verkeerde functie aanroep: getFormAsStringArray bij param: " + (param==null?"?":param));
+        if (!(obj instanceof String[]) && obj != null) {
+            throw new B3pCommonsException("Verkeerde functie aanroep: getFormAsStringArray bij param: " + (param == null ? "?" : param));
+        }
         return (String[]) obj;
     }
-    
+
     /**
      *
      * Deze gemaksfunctie haalt een waarde voor een formulierveld op en cast deze naar een Integer.
@@ -278,11 +301,12 @@ public abstract class FormBaseBean {
      */
     protected Integer getFormAsInteger(String param) throws B3pCommonsException {
         Object obj = getFormAsObject(param);
-        if (!(obj instanceof Integer) && obj!=null)
-            throw new B3pCommonsException("Verkeerde functie aanroep: getFormAsInteger bij param: " + (param==null?"?":param));
+        if (!(obj instanceof Integer) && obj != null) {
+            throw new B3pCommonsException("Verkeerde functie aanroep: getFormAsInteger bij param: " + (param == null ? "?" : param));
+        }
         return (Integer) obj;
     }
-    
+
     /**
      *
      * Deze gemaksfunctie haalt een waarde voor een formulierveld op en cast deze naar een FormFile.
@@ -300,11 +324,12 @@ public abstract class FormBaseBean {
      */
     protected FormFile getFormAsFormFile(String param) throws B3pCommonsException {
         Object obj = getFormAsObject(param);
-        if (!(obj instanceof FormFile) && obj!=null)
-            throw new B3pCommonsException("Verkeerde functie aanroep: getFormAsFormFile bij param: " + (param==null?"?":param));
+        if (!(obj instanceof FormFile) && obj != null) {
+            throw new B3pCommonsException("Verkeerde functie aanroep: getFormAsFormFile bij param: " + (param == null ? "?" : param));
+        }
         return (FormFile) obj;
     }
-    
+
     /**
      *
      * Deze gemaksfunctie haalt een waarde voor een formulierveld op en cast deze naar een boolean.
@@ -320,12 +345,13 @@ public abstract class FormBaseBean {
      */
     protected boolean getFormAsBoolean(String param) throws B3pCommonsException {
         Object obj = getFormAsObject(param);
-        if (!(obj instanceof Boolean) && obj!=null)
-            throw new B3pCommonsException("Verkeerde functie aanroep: getFormAsBoolean bij param: " + (param==null?"?":param));
+        if (!(obj instanceof Boolean) && obj != null) {
+            throw new B3pCommonsException("Verkeerde functie aanroep: getFormAsBoolean bij param: " + (param == null ? "?" : param));
+        }
         Boolean bo = (Boolean) obj;
-        return bo!=null && bo.booleanValue()? true : false;
+        return bo != null && bo.booleanValue() ? true : false;
     }
-    
+
     /**
      *
      * Deze gemaksfunctie haalt een waarde voor een formulierveld op als Object. Deze functie wordt
@@ -346,25 +372,29 @@ public abstract class FormBaseBean {
      *
      */
     protected Object getFormAsObject(String param) throws B3pCommonsException {
-        if (form==null)
+        if (form == null) {
             throw new B3pCommonsException("Form null error.");
+        }
         try {
             return form.get(param);
         } catch (java.lang.IllegalArgumentException iae) {
-            if (log.isErrorEnabled())
+            if (log.isErrorEnabled()) {
                 log.error("Dynaform get IllegalArgumentException ", iae);
-            throw new B3pCommonsException("getForm Error: ",  iae);
+            }
+            throw new B3pCommonsException("getForm Error: ", iae);
         } catch (java.lang.NullPointerException npe) {
-            if (log.isErrorEnabled())
+            if (log.isErrorEnabled()) {
                 log.error("Dynaform get NullPointerException ", npe);
-            throw new B3pCommonsException("getForm Error: ",  npe);
+            }
+            throw new B3pCommonsException("getForm Error: ", npe);
         } catch (java.lang.ClassCastException cce) {
-            if (log.isErrorEnabled())
+            if (log.isErrorEnabled()) {
                 log.error("Dynaform get ClassCastException ", cce);
-            throw new B3pCommonsException("getForm Error: ",  cce);
+            }
+            throw new B3pCommonsException("getForm Error: ", cce);
         }
     }
-    
+
     /**
      *
      * Deze gemaksfunctie plaatst een waarde in een struts formulierveld. Indien er
@@ -384,17 +414,20 @@ public abstract class FormBaseBean {
         try {
             form.set(param, value);
         } catch (java.lang.IllegalArgumentException iae) {
-            if (log.isErrorEnabled())
+            if (log.isErrorEnabled()) {
                 log.error("Dynaform get IllegalArgumentException ", iae);
-            throw new B3pCommonsException("setForm Error: ",  iae);
+            }
+            throw new B3pCommonsException("setForm Error: ", iae);
         } catch (java.lang.NullPointerException npe) {
-            if (log.isErrorEnabled())
+            if (log.isErrorEnabled()) {
                 log.error("Dynaform get NullPointerException ", npe);
-            throw new B3pCommonsException("setForm Error: ",  npe);
+            }
+            throw new B3pCommonsException("setForm Error: ", npe);
         } catch (java.lang.ClassCastException cce) {
-            if (log.isErrorEnabled())
+            if (log.isErrorEnabled()) {
                 log.error("Dynaform get ClassCastException ", cce);
-            throw new B3pCommonsException("setForm Error: ",  cce);
+            }
+            throw new B3pCommonsException("setForm Error: ", cce);
         }
     }
 
@@ -469,5 +502,4 @@ public abstract class FormBaseBean {
     public void setMapping(ActionMapping mapping) {
         this.mapping = mapping;
     }
-    
 }

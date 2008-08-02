@@ -1,3 +1,25 @@
+/*
+ * B3P Commons Core is a library with commonly used classes for webapps.
+ * Included are clieop3, oai, security, struts, taglibs and other
+ * general helper classes and extensions.
+ *
+ * Copyright 2000 - 2008 B3Partners BV
+ * 
+ * This file is part of B3P Commons Core.
+ * 
+ * B3P Commons Core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * B3P Commons Core is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with B3P Commons Core.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package nl.b3p.commons.oai.dataprovider20;
 
 import java.util.*;
@@ -5,58 +27,38 @@ import java.util.*;
 /**
  * Dublin Core record
  */
-
 public class DCRecord {
 
-	// For oai
-	private String fullid;
+    // For oai
+    private String fullid;
+    private String datestamp;
+    private String status;    // For dc only
+    private String title;
+    private String description;
+    private String publisher;
+    private String contributor;
+    private String date;
+    private String sets;
+    private String type;
+    private String format;
+    private Vector identifier;
+    private String source;
+    private String language;
+    private String relation;
+    private String coverage;
+    private String rights;
+    private Vector creator;
+    private Vector subject;
 
-	private String datestamp;
-
-	private String status;
-
-	// For dc only
-	private String title;
-
-	private String description;
-
-	private String publisher;
-
-	private String contributor;
-
-	private String date;
-
-	private String sets;
-
-	private String type;
-
-	private String format;
-
-	private Vector identifier;
-
-	private String source;
-
-	private String language;
-
-	private String relation;
-
-	private String coverage;
-
-	private String rights;
-
-	private Vector creator;
-
-	private Vector subject;
-
-	/** convert to string format */
-	public String toString() {
-		String result = null;
-		result = result + "fullid= " + fullid + "/n";
-		result = result + " datestamp= " + datestamp + "/n";
-		result = result + " title= " + title + "/n";
-		result = result + " description =" + description + "/n";
-		return result;
-	}
+    /** convert to string format */
+    public String toString() {
+        String result = null;
+        result = result + "fullid= " + fullid + "/n";
+        result = result + " datestamp= " + datestamp + "/n";
+        result = result + " title= " + title + "/n";
+        result = result + " description =" + description + "/n";
+        return result;
+    }
 
     public String getFullid() {
         return fullid;

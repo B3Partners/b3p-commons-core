@@ -1,12 +1,32 @@
 /*
- * $Id: ParameterLookupDispatchAction.java 2993 2006-03-27 06:21:31Z Chris $
+ * B3P Commons Core is a library with commonly used classes for webapps.
+ * Included are clieop3, oai, security, struts, taglibs and other
+ * general helper classes and extensions.
+ *
+ * Copyright 2000 - 2008 B3Partners BV
+ * 
+ * This file is part of B3P Commons Core.
+ * 
+ * B3P Commons Core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * B3P Commons Core is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with B3P Commons Core.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*
+ * $Id: ParameterLookupDispatchAction.java 2993 2006-03-27 06:21:31Z Chris $
+ */
 package nl.b3p.commons.struts;
 
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -14,7 +34,6 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.DynaActionForm;
-import org.apache.struts.actions.DispatchAction;
 
 /**
  * Deze abstracte <b>DispatchAction</b> dispatcht naar een publieke methode
@@ -82,12 +101,11 @@ import org.apache.struts.actions.DispatchAction;
  * </code>
  */
 public abstract class ParameterLookupDispatchAction extends UrlPathDispatchAction {
-    
-    
+
     public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        
+
         ActionForward af = super.execute(mapping, form, request, response);
-        
+
         /* Indien het form een DynaActionForm is en het form heeft een String
          * property met de naam van de parameter die is gesubmit, zet deze
          * property dan naar een lege String. Dit voor het kunnen submitten dmv
@@ -97,41 +115,40 @@ public abstract class ParameterLookupDispatchAction extends UrlPathDispatchActio
          * juiste knop.
          */
         String methodParameter = getDispatchedParameter(request);
-        if(methodParameter != null && form instanceof DynaActionForm) {
-            DynaActionForm dynaForm = (DynaActionForm)form;
+        if (methodParameter != null && form instanceof DynaActionForm) {
+            DynaActionForm dynaForm = (DynaActionForm) form;
             Object formPropertyValue = dynaForm.getMap().get(methodParameter);
-            if(formPropertyValue != null && formPropertyValue instanceof String && ((String)formPropertyValue).length() > 0) {
+            if (formPropertyValue != null && formPropertyValue instanceof String && ((String) formPropertyValue).length() > 0) {
                 dynaForm.set(methodParameter, "");
             }
         }
-        
+
         return af;
     }
-    
-    
+
     protected String getMethodParameter(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) {
         /* eerst kijken of hiervoor al een methode in de url of elders gevonden is
          * zo niet dan in de request parameters kijken
          */
         String parameter = super.getMethodParameter(mapping, form, request, response);
-        
-        if (parameter==null) {
+
+        if (parameter == null) {
             /* Kijk of er niet-lege parameters zijn die in de parameterMethodMap
              * keyset voorkomen. Dit is het geval indien een submit knop is
              * ingedrukt (of door JavaScript een form is gesubmit).
              */
-            
+
             Set keys = parameterMethodMap.keySet();
-            for(Iterator i = keys.iterator(); i.hasNext();) {
-                String key = (String)i.next();
+            for (Iterator i = keys.iterator(); i.hasNext();) {
+                String key = (String) i.next();
                 String keyParam = request.getParameter(key);
-                if(keyParam != null && keyParam.length() > 0) {
+                if (keyParam != null && keyParam.length() > 0) {
                     parameter = key;
                     break;
                 }
             }
         }
-        
+
         return parameter;
     }
 }
