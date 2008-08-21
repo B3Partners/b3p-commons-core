@@ -62,6 +62,10 @@ public class CsvOutputStream {
     public void flush() throws IOException {
         output.flush();
     }
+    
+    public void close() throws IOException {
+        output.close();
+    }
 
     private void writeValue(String value) throws IOException {
         if (value == null) {
