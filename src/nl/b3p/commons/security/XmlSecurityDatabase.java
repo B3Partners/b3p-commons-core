@@ -181,8 +181,8 @@ public class XmlSecurityDatabase extends HttpServlet {
             log.debug("Trying to login: " + username + " with password: " + password);
         }
         int nos = SessionCounter.getActiveSessions();
-        if (log.isInfoEnabled()) {
-            log.info("Number of active sessions: " + nos);
+        if (log.isDebugEnabled()) {
+            log.debug("Number of active sessions: " + nos);
         }
         if (maxNumOfSessions > 0 && nos > maxNumOfSessions) {
             return false;
@@ -207,8 +207,8 @@ public class XmlSecurityDatabase extends HttpServlet {
             log.debug("Checking role: " + role + " for user: " + username);
         }
         int nos = SessionCounter.getActiveSessions();
-        if (log.isInfoEnabled()) {
-            log.info("Number of active sessions: " + nos);
+        if (log.isDebugEnabled()) {
+            log.debug("Number of active sessions: " + nos);
         }
         if (maxNumOfSessions > 0 && nos > maxNumOfSessions) {
             return false;
