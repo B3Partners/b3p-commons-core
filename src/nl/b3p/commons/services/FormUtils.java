@@ -32,7 +32,6 @@ import org.apache.struts.validator.DynaValidatorForm;
 
 /**
  * @author <a href="chrisvanlith@b3partners.nl">Chris van Lith</a>
- * @version $Revision: 1.7 $ $Date: 2004/08/09 18:27:20 $
  */
 public final class FormUtils {
 
@@ -490,5 +489,21 @@ public final class FormUtils {
     public static boolean getBoolean(DynaValidatorForm dynaform, String param) {
         Boolean bo = (Boolean) dynaform.get(param);
         return bo != null && bo.booleanValue() ? true : false;
+    }
+    
+    public static String bytesToSizeFormat(long bytes) {
+        if(bytes < 1024) {
+            return bytes + " B";
+        }
+        NumberFormat f = NumberFormat.getNumberInstance(new Locale("nl"));
+        f.setMaximumFractionDigits(1);
+        f.setMinimumFractionDigits(1);
+        if(bytes < (1024*1024)) {
+            return f.format(bytes / 1024.0) + " kB";
+        }
+        if(bytes < (1024*1024*1024)) {
+            return f.format(bytes / (1024*1024.0)) + " MB";
+        }
+        return f.format(bytes / (1024*1024*1024.0)) + " GB";
     }
 }
