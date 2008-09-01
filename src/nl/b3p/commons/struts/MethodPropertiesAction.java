@@ -112,4 +112,13 @@ public abstract class MethodPropertiesAction extends ParameterLookupDispatchActi
         }
         messages.add(ActionMessages.GLOBAL_MESSAGE, message);
     }
+    
+    protected void addAttributeMessage(HttpServletRequest request, String attribute, String message) {
+        ActionMessages messages = (ActionMessages) request.getAttribute(attribute);
+        if (messages == null) {
+            messages = new ActionMessages();
+            request.setAttribute(attribute, messages);
+        }
+        messages.add(ActionMessages.GLOBAL_MESSAGE, new ActionMessage(message));
+    }
 }
