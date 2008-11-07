@@ -3,7 +3,6 @@
  *
  * Created on 3 april 2005, 16:07
  */
-
 package nl.b3p.commons.services;
 
 import java.util.ArrayList;
@@ -82,69 +81,50 @@ import org.apache.struts.validator.DynaValidatorForm;
  * @author <a href="chrisvanlith@b3partners.nl">Chris van Lith</a>
  * @version $Revision: 1.0 $ $Date: 2005/05/17 12:48:31 $
  */
-
 public abstract class EditBaseBean extends FormBaseBean {
-    
+
     protected Log log = LogFactory.getLog(this.getClass());
-    
     private String newAction = null;
-    
     protected Object theObject = null;
     protected ArrayList subObjects = new ArrayList();
-    
     public static final String INVALID_ACTION = "INVALID";
     public static final String CANCELLED_ACTION = "CANCELLED";
-    
     public static final String START_ACTION = "Start";
     public static final String EDIT_ACTION = "Edit";
     public static final String NEW_ACTION = "New";
     public static final String SAVE_ACTION = "Save";
     public static final String SAVENEW_ACTION = "SaveNew";
-    public static final String DELETE_ACTION = "Delete";
-    
-    // Volgende knop wordt aangevuld met rangnummer van subtabel
+    public static final String DELETE_ACTION = "Delete";    // Volgende knop wordt aangevuld met rangnummer van subtabel
     public static final String SUBDELETE_ACTION = "SubDelete";
     public static final String SUBNEW_ACTION = "SubNew";
     public static final String SUBSAVENEW_ACTION = "SubSaveNew";
     public static final String SUBSAVE_ACTION = "SubSave";
-    public static final String SUBEDIT_ACTION = "SubEdit";
-    
-    // Algemene knoppen
+    public static final String SUBEDIT_ACTION = "SubEdit";    // Algemene knoppen
     public static final String OK_BUTTON = "ok";
     public static final String CANCEL_BUTTON = "cancel";
-    
     public static final String DELETE_BUTTON = "delete";
     public static final String NEW_BUTTON = "new";
     public static final String SAVE_BUTTON = "save";
     public static final String SAVENEW_BUTTON = "savenew";
-    public static final String EDIT_BUTTON = "edit";
-    
-    // Volgende knoppen worden aangevuld met rangnummer van subtabel
+    public static final String EDIT_BUTTON = "edit";    // Volgende knoppen worden aangevuld met rangnummer van subtabel
     public static final String SUBNEW_BUTTON = "subnew";
     public static final String SUBSAVE_BUTTON = "subsave";
     public static final String SUBSAVENEW_BUTTON = "subsavenew";
     public static final String SUBDELETE_BUTTON = "subdelete";
     public static final String SUBEDIT_BUTTON = "subedit";
-    
     public static final String NEWJOIN_BUTTON = "newjoin";
-    public static final String DELETEJOIN_BUTTON = "deletejoin";
-    
-    // Dit zijn de waarden voor tag van de foutmeldingen in de jsp
+    public static final String DELETEJOIN_BUTTON = "deletejoin";    // Dit zijn de waarden voor tag van de foutmeldingen in de jsp
     public static final String MAIN_MESSAGE = "MAIN_MESSAGE";
     // Volgende knoppen worden aangevuld met rangnummer van subtabel
-    public static final String SUB_MESSAGE = "SUB_MESSAGE";
-    
-    // Default id voor lege subrecords
-    protected static int TEMPNEW_ID = -1;
-    
-    // Configuratie parameters
+    public static final String SUB_MESSAGE = "SUB_MESSAGE";    // Default id voor lege subrecords
+    protected static int TEMPNEW_ID = -1;    // Configuratie parameters
     private boolean directSave = false;
     private boolean directDelete = false;
     private boolean directSubSave = false;
     private boolean directSubDelete = false;
     private boolean returnAfterSubSave = true;
     private boolean allowEdits = true; // inclusief delete
-    
+
     /**
      * Deze minimale constructor kent geen locale instelling, geen
      * message resources en geen foutterugmelding en zal niet vaak
@@ -159,7 +139,7 @@ public abstract class EditBaseBean extends FormBaseBean {
             ActionMapping mapp) {
         this(req, null, null, null, dform, mapp);
     }
-    
+
     /**
      * De constructor bepaalt uit de request de parameters welke gepost zijn en slaat deze
      * lokaal op. Hiernaast wordt het struts formulier zelf lokaal opgeslagen.
@@ -180,10 +160,10 @@ public abstract class EditBaseBean extends FormBaseBean {
             ActionMessages err,
             DynaValidatorForm dform,
             ActionMapping mapp) {
-        
+
         super(req, loc, mess, err, dform, mapp);
     }
-    
+
     /**
      * Deze functie procest een request, welke is opgeslagen bij de constructie van de bean.
      * <p>
@@ -199,18 +179,18 @@ public abstract class EditBaseBean extends FormBaseBean {
      * @param validateErrors bevat alle validatie errors, zoals door struts vastgesteld
      */
     public ActionForward process(boolean tokenValid, boolean transactionCancelled, ActionErrors validateErrors) {
-        
+
         if (!isInit) {
             errors.add(MAIN_MESSAGE, new ActionError("error.invoerenrecord.general"));
             return mapping.findForward("failure");
         }
-        
+
         ActionForward f = null;
         try {
             ActionErrors verrs = determineAction(tokenValid, transactionCancelled, validateErrors);
-            
+
             determineObjects();
-            
+
             // Welke knop is geklikt
             if (buttonPressed(OK_BUTTON)) {
                 f = confirmButton(verrs);
@@ -229,7 +209,7 @@ public abstract class EditBaseBean extends FormBaseBean {
             } else {
                 // Volgende knoppen worden aangevuld met rangnummer van subtabel
                 int numOfSubs = subObjects.size();
-                for (int subNum=1; subNum<=numOfSubs; subNum++) {
+                for (int subNum = 1; subNum <= numOfSubs; subNum++) {
                     if (buttonPressed(SUBNEW_BUTTON + subNum)) {
                         f = subNewButton(subNum);
                         break;
@@ -254,25 +234,25 @@ public abstract class EditBaseBean extends FormBaseBean {
                     }
                 }
             }
-            if (f!=null)
+            if (f != null) {
                 return f;
-            
-            
+            }
             f = populateMainForm();
-            if (f!=null)
+            if (f != null) {
                 return f;
-            
-            if (theObject!=null) {
+            }
+            if (theObject != null) {
                 int numOfSubs = subObjects.size();
-                for (int subNum=1; subNum<=numOfSubs; subNum++) {
+                for (int subNum = 1; subNum <= numOfSubs; subNum++) {
                     f = populateSubForms(subNum);
-                    if (f!=null)
+                    if (f != null) {
                         return f;
+                    }
                 }
             }
-            
+
             determineNewAction();
-            
+
         } catch (Exception e) {
             log.error("error: ", e);
             errors.add(MAIN_MESSAGE, new ActionError("error.database", e.getMessage()));
@@ -280,7 +260,7 @@ public abstract class EditBaseBean extends FormBaseBean {
         } finally {
             // evt list maken?
         }
-        
+
         try {
             // Aanmaken lijst voor koppeltabel
             createJoinList();
@@ -288,8 +268,8 @@ public abstract class EditBaseBean extends FormBaseBean {
             createLists();
             // Voor formulier specifieke afhandelingen
             f = userProcess(tokenValid, transactionCancelled, validateErrors);
-            if (f!=null) {
-                if(f.getName().equals("none")) {
+            if (f != null) {
+                if (f.getName().equals("none")) {
                     // userProcess() heeft de response al geschreven
                     return null;
                 } else {
@@ -301,10 +281,10 @@ public abstract class EditBaseBean extends FormBaseBean {
             errors.add(MAIN_MESSAGE, new ActionError("error.invoerenrecord.general", be.getMessage()));
             return mapping.findForward("failure");
         }
-        
+
         return mapping.findForward("success");
     }
-    
+
     /**
      * Deze functie bepaalt de waarde van <I>action</I>. Indien er nog geen <I>action</I> gedefinieerd
      * is krijgt deze de waarde START_ACTION. Deze functie weet dan dat er niet op token gecontroleerd
@@ -320,13 +300,13 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected ActionErrors determineAction(boolean tokenValid,
             boolean transactionCancelled, ActionErrors validateErrors) throws B3pCommonsException {
         action = getParamAsString("action");
-        
+
         newAction = action;
         if (nullOrEmpty(action)) {
             action = START_ACTION;
             newAction = EDIT_ACTION;
         }
-        
+
         // De eerste keer is er nog geen token
         if (!isAction(START_ACTION)) {
             // Validate the transactional control token
@@ -342,17 +322,18 @@ public abstract class EditBaseBean extends FormBaseBean {
             action = EDIT_ACTION;
             newAction = EDIT_ACTION;
         }
-        
+
         // Was this transaction cancelled?
         if (transactionCancelled) {
-            if (log.isDebugEnabled())
+            if (log.isDebugEnabled()) {
                 log.debug(" Transaction '" + action + "' was cancelled");
+            }
             action = CANCELLED_ACTION;
             newAction = EDIT_ACTION;
         }
         return validateErrors;
     }
-    
+
     /**
      * Deze functie haalt het hoofdobject op en de subobjecten worden in een array
      * bewaard voor gebruik later.
@@ -365,9 +346,10 @@ public abstract class EditBaseBean extends FormBaseBean {
         } catch (B3pCommonsException ex) {
             log.debug("no main object!");
         }
-        if (theObject==null)
+        if (theObject == null) {
             return;
         // Haal actieve gekoppelde objecten op, indien van toepassing
+        }
         int subNum = 1;
         do {
             try {
@@ -376,9 +358,9 @@ public abstract class EditBaseBean extends FormBaseBean {
                 log.debug("no subobject" + subNum + "!");
             } // 0-based
             subNum++;
-        } while (subNum<=10); // limiet om einde van loop zeker te stellen
+        } while (subNum <= 10); // limiet om einde van loop zeker te stellen
     }
-    
+
     /**
      * Een subclass kan deze methode overriden om extra acties te doen, bijvoorbeeld
      * bij de save-actie (bevestiging) of code voor een nieuwe knop. Deze methode wordt
@@ -400,57 +382,56 @@ public abstract class EditBaseBean extends FormBaseBean {
             boolean transactionCancelled, ActionErrors validateErrors) throws B3pCommonsException {
         return null;
     }
-    
+
     protected ActionForward confirmButton(ActionErrors validateErrors) throws B3pCommonsException {
         if (allowEdits) {
-            
+
             if (isAction(SAVE_ACTION)) {
                 return saveAction(validateErrors);
 //                return saveAllAction(validateErrors);
             }
-            if (isAction(DELETE_ACTION) && theObject!=null) {
+            if (isAction(DELETE_ACTION) && theObject != null) {
                 return deleteAction();
             }
-            
+
             int numOfSubs = subObjects.size();
-            for (int subNum=1; subNum<=numOfSubs; subNum++) {
-                Object subObject =(Object) subObjects.get(subNum-1);
-                if (subObject!=null) {
+            for (int subNum = 1; subNum <= numOfSubs; subNum++) {
+                Object subObject = (Object) subObjects.get(subNum - 1);
+                if (subObject != null || Integer.toString(TEMPNEW_ID).equals(getSubID(subNum))) {
                     String subSaveAction = SUBSAVE_ACTION + subNum;
                     if (subSaveAction.equals(action)) {
                         return subSaveAction(subNum, validateErrors);
                     }
-                    String subEditAction = SUBEDIT_ACTION + subNum;
-                    String subDeleteAction = SUBDELETE_ACTION + subNum;
-                    if (subDeleteAction.equals(action) && subObject!=null) {
-                        return subDeleteAction(subNum);
-                    }
+                }
+                String subDeleteAction = SUBDELETE_ACTION + subNum;
+                if (subDeleteAction.equals(action) && subObject != null) {
+                    return subDeleteAction(subNum);
                 }
             }
-            
+
         } else {
             errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
             newAction = EDIT_ACTION;
         }
         return null;
     }
-    
+
     protected ActionForward cancelButton() throws B3pCommonsException {
         log.info(" Cancel action");
         int numOfSubs = subObjects.size();
         Object subObject;
-        for (int subNum=1; subNum<=numOfSubs; subNum++) {
+        for (int subNum = 1; subNum <= numOfSubs; subNum++) {
             // Bij annuleren worden de velden dan gereset via nieuw subobject
             subObject = getNewSubObject(subNum);
-            subObjects.set(subNum-1,  subObject);
+            subObjects.set(subNum - 1, subObject);
             setSubID(subNum, "");
         }
         newAction = EDIT_ACTION;
         return null;
     }
-    
+
     protected ActionForward deleteButton() throws B3pCommonsException {
-        if (isAction(EDIT_ACTION) && allowEdits && theObject!=null) {
+        if (isAction(EDIT_ACTION) && allowEdits && theObject != null) {
             if (directDelete) {
                 return deleteAction();
             } else {
@@ -463,7 +444,7 @@ public abstract class EditBaseBean extends FormBaseBean {
         }
         return null;
     }
-    
+
     protected ActionForward newButton() throws B3pCommonsException {
         if (isAction(EDIT_ACTION) && allowEdits) {
             log.debug(" Reset DynaForm bean under key " + mapping.getAttribute());
@@ -472,10 +453,10 @@ public abstract class EditBaseBean extends FormBaseBean {
             // merker dat record nieuw is, wordt later op gecheckt
             setID(Integer.toString(TEMPNEW_ID));
             int numOfSubs = subObjects.size();
-            for (int subNum=1; subNum<=numOfSubs; subNum++) {
+            for (int subNum = 1; subNum <= numOfSubs; subNum++) {
                 setSubID(subNum, null);
                 Object subObject = getNewSubObject(subNum);
-                subObjects.set(subNum-1, subObject );
+                subObjects.set(subNum - 1, subObject);
             }
             log.debug(" create new");
 //                errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.new"));
@@ -485,13 +466,13 @@ public abstract class EditBaseBean extends FormBaseBean {
         newAction = EDIT_ACTION;
         return null;
     }
-    
+
     protected ActionForward saveButton(ActionErrors validateErrors) throws B3pCommonsException {
-        if (isAction(EDIT_ACTION) && allowEdits ) {
+        if (isAction(EDIT_ACTION) && allowEdits) {
             if (directSave) {
                 return saveAction(validateErrors);
             } else {
-                if (theObject!=null) {
+                if (theObject != null) {
                     log.debug(" save existing");
                     errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.save"));
                 } else {
@@ -505,43 +486,43 @@ public abstract class EditBaseBean extends FormBaseBean {
         }
         return null;
     }
-    
+
     protected ActionForward saveNewButton(ActionErrors validateErrors) throws B3pCommonsException {
-        if (isAction(EDIT_ACTION) && allowEdits ) {
+        if (isAction(EDIT_ACTION) && allowEdits) {
             log.debug(" save current");
             saveAction(validateErrors);
-            
+
             form.initialize(mapping);
             theObject = getNewObject();
             // merker dat record nieuw is, wordt later op gecheckt
             setID(Integer.toString(TEMPNEW_ID));
             int numOfSubs = subObjects.size();
-            for (int subNum=1; subNum<=numOfSubs; subNum++) {
+            for (int subNum = 1; subNum <= numOfSubs; subNum++) {
                 setSubID(subNum, null);
                 Object subObject = getNewSubObject(subNum);
-                subObjects.set(subNum-1, subObject );
+                subObjects.set(subNum - 1, subObject);
             }
             log.debug(" create new");
-            
+
         } else {
             errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
         }
         return null;
     }
-    
+
     protected ActionForward editButton(ActionErrors validateErrors) throws B3pCommonsException {
         newAction = EDIT_ACTION;
         return null;
     }
-    
+
     protected ActionForward subNewButton(int subNum) throws B3pCommonsException {
         String subEditAction = SUBEDIT_ACTION + subNum;
         if ((isAction(EDIT_ACTION) || isAction(subEditAction)) && allowEdits) {
-            Object subObject =(Object) subObjects.get(subNum-1);
+            Object subObject = (Object) subObjects.get(subNum - 1);
             // merker dat record nieuw is, wordt later op gecheckt
             setSubID(subNum, Integer.toString(TEMPNEW_ID));
             subObject = getNewSubObject(subNum);
-            subObjects.set(subNum-1, subObject );
+            subObjects.set(subNum - 1, subObject);
 //          errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subnew", getSubNames(subNum)));
             newAction = SUBEDIT_ACTION + subNum;
         } else {
@@ -550,50 +531,50 @@ public abstract class EditBaseBean extends FormBaseBean {
         }
         return null;
     }
-    
+
     protected ActionForward subSaveButton(int subNum, ActionErrors validateErrors) throws B3pCommonsException {
-        Object subObject =(Object) subObjects.get(subNum-1);
+        Object subObject = (Object) subObjects.get(subNum - 1);
         String subEditAction = SUBEDIT_ACTION + subNum;
         if (isAction(subEditAction) && allowEdits) {
             if (directSubSave) {
                 return subSaveAction(subNum, validateErrors);
             } else {
-                if (subObject!=null) {
+                if (subObject != null) {
                     log.debug(" subsave existing");
                     errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subsave", getSubNames(subNum)));
                 } else {
                     log.debug(" create subnew");
                     errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subnew", getSubNames(subNum)));
                 }
-                newAction = SUBSAVE_ACTION +subNum;
+                newAction = SUBSAVE_ACTION + subNum;
             }
         } else {
             errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.notallowed"));
         }
         return null;
     }
-    
+
     protected ActionForward subSaveNewButton(int subNum, ActionErrors validateErrors) throws B3pCommonsException {
-        Object subObject =(Object) subObjects.get(subNum-1);
+        Object subObject = (Object) subObjects.get(subNum - 1);
         String subEditAction = SUBEDIT_ACTION + subNum;
         if (isAction(subEditAction) && allowEdits) {
             subSaveAction(subNum, validateErrors);
-            
+
             // merker dat record nieuw is, wordt later op gecheckt
             setSubID(subNum, Integer.toString(TEMPNEW_ID));
             subObject = getNewSubObject(subNum);
-            subObjects.set(subNum-1, subObject );
-            
+            subObjects.set(subNum - 1, subObject);
+
         } else {
             errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.notallowed"));
         }
         return null;
     }
-    
+
     protected ActionForward subDeleteButton(int subNum) throws B3pCommonsException {
-        Object subObject =(Object) subObjects.get(subNum-1);
+        Object subObject = (Object) subObjects.get(subNum - 1);
         String subEditAction = SUBEDIT_ACTION + subNum;
-        if (isAction(subEditAction) && allowEdits && subObject!=null) {
+        if (isAction(subEditAction) && allowEdits && subObject != null) {
             if (directSubDelete) {
                 return subDeleteAction(subNum);
             }
@@ -606,10 +587,10 @@ public abstract class EditBaseBean extends FormBaseBean {
         }
         return null;
     }
-    
+
     protected ActionForward subEditButton(int subNum) throws B3pCommonsException {
-        Object subObject =(Object) subObjects.get(subNum-1);
-        if (subObject!=null) {
+        Object subObject = (Object) subObjects.get(subNum - 1);
+        if (subObject != null) {
             log.debug(" edit subrecord");
 //                            errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subedit", getSubNames(subNum)));
             newAction = SUBEDIT_ACTION + subNum;
@@ -619,7 +600,7 @@ public abstract class EditBaseBean extends FormBaseBean {
         }
         return null;
     }
-    
+
     protected ActionForward newJoinButton(int subNum, ActionErrors validateErrors) throws B3pCommonsException {
         if (isAction(EDIT_ACTION) && allowEdits) {
             createJoin(subNum);
@@ -629,7 +610,7 @@ public abstract class EditBaseBean extends FormBaseBean {
         }
         return null;
     }
-    
+
     protected ActionForward deleteJoinButton(int subNum, ActionErrors validateErrors) throws B3pCommonsException {
         if (isAction(EDIT_ACTION) && allowEdits) {
             deleteJoin(subNum);
@@ -639,8 +620,7 @@ public abstract class EditBaseBean extends FormBaseBean {
         }
         return null;
     }
-    
-    
+
     /**
      * Het hoofdrecord met alle bijbehorende subrecords wordt gewist.
      * In de vorige ronde is een waarschuwing gegeven!
@@ -650,12 +630,12 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected ActionForward deleteAction() throws B3pCommonsException {
         log.info(" Deleting Record '" + theObject.toString() + "'");
         int numOfSubs = subObjects.size();
-        for (int subNum=1; subNum<=numOfSubs; subNum++) {
-            Object subObject =(Object) subObjects.get(subNum-1);
-            if (subObject!=null) {
+        for (int subNum = 1; subNum <= numOfSubs; subNum++) {
+            Object subObject = (Object) subObjects.get(subNum - 1);
+            if (subObject != null) {
                 deleteSubObject(subNum);
                 subObject = null;
-                subObjects.set(subNum-1, subObject );
+                subObjects.set(subNum - 1, subObject);
                 setSubID(subNum, null);
             }
         }
@@ -663,17 +643,17 @@ public abstract class EditBaseBean extends FormBaseBean {
         theObject = null;
         setID(null);
         log.debug(" Reset DynaForm bean under key " + mapping.getAttribute());
-        
+
         form.initialize(mapping);
         subObjects = new ArrayList();
         newAction = EDIT_ACTION;
-        
-        if (directDelete)
+
+        if (directDelete) {
             errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.deletedone"));
-        
+        }
         return null;
     }
-    
+
     /**
      * Deze functie wist een subrecord.
      * <p>
@@ -681,21 +661,21 @@ public abstract class EditBaseBean extends FormBaseBean {
      * @param subNum rangnummer van formulier
      */
     protected ActionForward subDeleteAction(int subNum) throws B3pCommonsException {
-        Object subObject =(Object) subObjects.get(subNum-1);
+        Object subObject = (Object) subObjects.get(subNum - 1);
         log.info(" deleting subrecord '" + subObject.toString() + "'");
         deleteSubObject(subNum);
         // HACK: door een leeg object door te geven wordt dit subformulier gewist
         subObject = getNewSubObject(subNum);
-        subObjects.set(subNum-1, subObject );
+        subObjects.set(subNum - 1, subObject);
         setSubID(subNum, null);
         newAction = EDIT_ACTION;
-        
-        if (directSubDelete)
+
+        if (directSubDelete) {
             errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subdeletedone", getSubNames(subNum)));
-        
+        }
         return null;
     }
-    
+
     /**
      * Deze functie voert de SAVE_ACTION uit. Er wordt
      * gecontroleerd of struts fouten in de invoer van het formulier heeft geconstateerd.
@@ -719,19 +699,19 @@ public abstract class EditBaseBean extends FormBaseBean {
                 theObject = getNewObject();
                 subObjects = new ArrayList();
             }
-            if (theObject!=null) {
+            if (theObject != null) {
                 populateObject();
                 syncID();
                 log.debug(" Populating database object from form bean");
             }
             newAction = EDIT_ACTION;
-            if (directSave)
+            if (directSave) {
                 errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.savedone"));
+            }
         }
         return null;
     }
-    
-    
+
     /**
      * Deze functie bewaart een subrecord.
      * <p>
@@ -740,7 +720,7 @@ public abstract class EditBaseBean extends FormBaseBean {
      * @param validateErrors foutenmeldingen van formulier
      */
     protected ActionForward subSaveAction(int subNum, ActionErrors validateErrors) throws B3pCommonsException {
-        Object subObject =(Object) subObjects.get(subNum-1);
+        Object subObject = (Object) subObjects.get(subNum - 1);
         String subEditAction = SUBEDIT_ACTION + subNum;
         String subSaveAction = SUBSAVE_ACTION + subNum;
         // validatie
@@ -753,25 +733,25 @@ public abstract class EditBaseBean extends FormBaseBean {
             // in het form een merker is aangebracht die dit aangeeft.
             if (subObject == null && Integer.toString(TEMPNEW_ID).equals(getSubID(subNum))) {
                 subObject = getNewSubObject(subNum);
-                subObjects.set(subNum-1,  subObject);
+                subObjects.set(subNum - 1, subObject);
             }
-            if (subObject!=null) {
+            if (subObject != null) {
                 log.info(" Adding Subrecord " + subNum + " '" + subObject.toString() + "'");
                 populateSubObject(subNum);
                 syncSubID(subNum);
             }
-            if (returnAfterSubSave)
+            if (returnAfterSubSave) {
                 newAction = EDIT_ACTION;
-            else
+            } else {
                 newAction = subEditAction;
-            
-            if (directSubSave)
+            }
+            if (directSubSave) {
                 errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subsavedone", getSubNames(subNum)));
+            }
         }
         return null;
     }
-    
-    
+
     /**
      * Deze functie bewaart het hoofdformulier met alle subformulieren. Er wordt dan
      * gecontroleerd of struts fouten in de invoer van het formulier heeft geconstateerd.
@@ -786,7 +766,7 @@ public abstract class EditBaseBean extends FormBaseBean {
      */
     protected ActionForward saveAllAction(ActionErrors validateErrors) throws B3pCommonsException {
         // validatie
-        if (validateErrors!=null && !validateErrors.isEmpty()) {
+        if (validateErrors != null && !validateErrors.isEmpty()) {
             log.info("Validation error!");
             errors.add(validateErrors);
             return null;
@@ -797,19 +777,19 @@ public abstract class EditBaseBean extends FormBaseBean {
             theObject = getNewObject();
             subObjects = new ArrayList();
         }
-        if (theObject!=null) {
+        if (theObject != null) {
             populateObject();
             syncID();
             int numOfSubs = subObjects.size();
-            for (int subNum=1; subNum<=numOfSubs; subNum++) {
-                Object subObject =(Object) subObjects.get(subNum-1);
+            for (int subNum = 1; subNum <= numOfSubs; subNum++) {
+                Object subObject = (Object) subObjects.get(subNum - 1);
                 // Een nieuw subobject wordt alleen aangemaakt indien
                 // in het form een merker is aangebracht die dit aangeeft.
                 if (subObject == null && Integer.toString(TEMPNEW_ID).equals(getSubID(subNum))) {
                     subObject = getNewSubObject(subNum);
-                    subObjects.set(subNum-1,  subObject);
+                    subObjects.set(subNum - 1, subObject);
                 }
-                if (subObject!=null) {
+                if (subObject != null) {
                     populateSubObject(subNum);
                     syncSubID(subNum);
                 }
@@ -817,13 +797,13 @@ public abstract class EditBaseBean extends FormBaseBean {
             log.debug(" Populating database object and subobjects from form bean");
         }
         newAction = EDIT_ACTION;
-        
-        if (directSave)
+
+        if (directSave) {
             errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.savedone"));
-        
+        }
         return null;
     }
-    
+
     /**
      * Deze functie vult het hoofdformulier met
      * de bijgewerkte informatie uit de database.
@@ -831,16 +811,17 @@ public abstract class EditBaseBean extends FormBaseBean {
      * @return niet null bij fouten
      */
     protected ActionForward populateMainForm() throws B3pCommonsException {
-        if (theObject==null)
+        if (theObject == null) {
             return null;
         // Bij save action moet het form niet opnieuw gevuld worden
+        }
         if (!isNewAction(SAVE_ACTION)) {
             populateForm();
             log.debug(" Populating form from " + theObject.toString());
         }
         return null;
     }
-    
+
     /**
      * Deze functie vult een subformulieren met
      * de bijgewerkte informatie uit de database.
@@ -848,9 +829,10 @@ public abstract class EditBaseBean extends FormBaseBean {
      * @return niet null bij fouten
      */
     protected ActionForward populateSubForms(int subNum) throws B3pCommonsException {
-        Object subObject =(Object) subObjects.get(subNum-1);
-        if (subObject==null)
+        Object subObject = (Object) subObjects.get(subNum - 1);
+        if (subObject == null) {
             return null;
+        }
         String subSaveAction = SUBSAVE_ACTION + subNum;
         // Bij subsave action moet het subform niet opnieuw gevuld worden
         if (!isNewAction(subSaveAction)) {
@@ -859,7 +841,7 @@ public abstract class EditBaseBean extends FormBaseBean {
         }
         return null;
     }
-    
+
     /**
      * Deze functie verwijdert de niet relevante errors uit de lijst door
      * te kijken naar de velden (properties) die in het form aanwezig zijn.
@@ -868,15 +850,16 @@ public abstract class EditBaseBean extends FormBaseBean {
      * @param ve
      */
     protected boolean reduceMainErrors(ActionErrors ve) {
-        if (ve==null || ve.isEmpty())
+        if (ve == null || ve.isEmpty()) {
             return false;
+        }
         Iterator it = ve.properties();
         boolean errorsFound = false;
         ArrayList mp = getMainProperties();
         while (it.hasNext()) {
             String ep = (String) it.next();
             Iterator it2 = ve.get(ep);
-            if (mp==null || mp.contains(ep)) {
+            if (mp == null || mp.contains(ep)) {
                 while (it2.hasNext()) {
                     errorsFound = true;
                     ActionMessage am = (ActionMessage) it2.next();
@@ -886,7 +869,7 @@ public abstract class EditBaseBean extends FormBaseBean {
         }
         return errorsFound;
     }
-    
+
     /**
      * Deze functie verwijdert de niet relevante errors uit de lijst door
      * te kijken naar de velden (properties) die in het form aanwezig zijn.
@@ -896,15 +879,16 @@ public abstract class EditBaseBean extends FormBaseBean {
      * @param validateErrors volledige lijst foutmeldingen
      */
     protected boolean reduceSubErrors(int subForm, ActionErrors ve) {
-        if (ve==null || ve.isEmpty())
+        if (ve == null || ve.isEmpty()) {
             return false;
+        }
         Iterator it = ve.properties();
         boolean errorsFound = false;
         ArrayList mp = getSubProperties(subForm);
         while (it.hasNext()) {
             String ep = (String) it.next();
             Iterator it2 = ve.get(ep);
-            if (mp==null || mp.contains(ep)) {
+            if (mp == null || mp.contains(ep)) {
                 while (it2.hasNext()) {
                     errorsFound = true;
                     ActionMessage am = (ActionMessage) it2.next();
@@ -914,7 +898,7 @@ public abstract class EditBaseBean extends FormBaseBean {
         }
         return errorsFound;
     }
-    
+
     /**
      * Deze functie vult de nieuwe actie in op het struts form, zodat
      * de volgende ronde hiermee gewerkt wordt.
@@ -925,11 +909,11 @@ public abstract class EditBaseBean extends FormBaseBean {
         setForm("action", newAction);
         return;
     }
-    
+
     protected B3pCommonsException getNoSubFormException(int subForm) {
         return new B3pCommonsException(messages.getMessage(locale, "error.invoerenrecord.noform", new Integer(subForm)));
     }
-    
+
     /**
      * Tijdens de uitvoer van de functies zal een nieuwe actie berekend worden voor de volgende post.
      * Deze nieuwe actie wordt hieropgeslagen en juist voor het beeindigen van de process-functie
@@ -941,7 +925,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected String getNewAction() {
         return newAction;
     }
-    
+
     /**
      * setter voor newAction
      * @param newAction zet een nieuwe actie voor de volgende ronde
@@ -949,18 +933,19 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected void setNewAction(String newAction) {
         this.newAction = newAction;
     }
-    
+
     /**
      * test of een actie de huidige actie voor de volgende ronde is
      * @param lact te testen actie
      * @return true indien huidige actie voor de volgende ronde gelijk is aan de te testen actie
      */
     protected boolean isNewAction(String lact) {
-        if (lact==null)
+        if (lact == null) {
             return false;
+        }
         return lact.equals(getNewAction());
     }
-    
+
     /**
      * Een concrete implementatie van deze functie haalt het id op van de hoofdtabel
      * uit het struts formulier dat getoond wordt, bijvoorbeeld via:
@@ -972,7 +957,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected String getMainID() throws B3pCommonsException {
         throw new B3pCommonsException("not implemented!");
     }
-    
+
     /**
      * Een concrete implementatie van deze functie haalt het eerst het id op van de hoofdrecord
      * uit het struts formulier dat getoond wordt, bijvoorbeeld via:
@@ -987,7 +972,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected Object getMainObject() throws B3pCommonsException {
         throw new B3pCommonsException("not implemented!");
     }
-    
+
     /**
      * Deze functie geeft lijst van veldnamen, waarop gecheckt moet worden bij
      * validatie. Indien null, worden alle velden meegenomen.
@@ -997,8 +982,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected ArrayList getMainProperties() {
         return null;
     }
-    
-    
+
     /**
      * Een concrete implementatie van deze functie zorgt ervoor dat een nieuw persistent
      * object wordt aangemaakt voor de hoofdtabel.
@@ -1009,7 +993,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected Object getNewObject() throws B3pCommonsException {
         throw new B3pCommonsException("not implemented!");
     }
-    
+
     /**
      * Een concrete implementatie van deze functie bepaalt het id in het struts
      * formulier voor de gezochte subtabel.
@@ -1037,7 +1021,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected String getSubID(int subForm) throws B3pCommonsException {
         throw getNoSubFormException(subForm);
     }
-    
+
     /**
      * Een concrete implementatie van deze functie haalt het tabelobject op van de gekoppelde
      * subtabel met een subid als aangegeven. Indien de waarde van het veld met de subid
@@ -1068,7 +1052,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected Object getSubObject(int subForm) throws B3pCommonsException {
         throw getNoSubFormException(subForm);
     }
-    
+
     /**
      * Deze functie geeft lijst van veldnamen, waarop gecheckt moet worden bij
      * validatie. Indien null, worden alle velden meegenomen.
@@ -1079,7 +1063,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected ArrayList getSubProperties(int subForm) {
         return null;
     }
-    
+
     /**
      * Deze functie geeft de naam van het subformulier, zoals dat bij
      * foutmeldingen moet worden geroond. Indien deze functie niet overklast
@@ -1091,7 +1075,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected String getSubNames(int subForm) {
         return Integer.toString(subForm);
     }
-    
+
     /**
      * Een concrete implementatie van deze functie zorgt ervoor dat een nieuw persistent
      * object wordt aangemaakt voor de gevraagde subtabel.
@@ -1103,7 +1087,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected Object getNewSubObject(int subForm) throws B3pCommonsException {
         throw getNoSubFormException(subForm);
     }
-    
+
     /**
      * Een concrete implementatie van deze functie plaatst een subid in het subid veld.
      * Indien subid null is, wordt het veld leeg gemaakt.
@@ -1115,7 +1099,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected void setSubID(int subForm, String subid) throws B3pCommonsException {
         throw getNoSubFormException(subForm);
     }
-    
+
     /**
      * Een concrete implementatie van deze functie plaatst een nieuw id in het id veld.
      * Indien subid null is, wordt het veld leeg gemaakt.
@@ -1126,7 +1110,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected void setID(String id) throws B3pCommonsException {
         throw new B3pCommonsException("not implemented!");
     }
-    
+
     /**
      * Een concrete implementatie van deze functie synchroniseert het id van het hoofdobject
      * met het id in het strutsformulier.
@@ -1146,7 +1130,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected void syncID() throws B3pCommonsException {
         throw new B3pCommonsException("not implemented!");
     }
-    
+
     /**
      * Een concrete implementatie van deze functie synchroniseert het id van het hoofdobject
      * met het id in het strutsformulier.
@@ -1178,7 +1162,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected void syncSubID(int subForm) throws B3pCommonsException {
         throw getNoSubFormException(subForm);
     }
-    
+
     /**
      * Een concrete implementatie van deze functie moet het hoofdobject verwijderen
      * uit de database, alle afhankelijke subrecords dienen vooraf al verwijderd te
@@ -1189,7 +1173,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected void deleteObject() throws B3pCommonsException {
         throw new B3pCommonsException("not implemented!");
     }
-    
+
     /**
      * Een concrete implementatie van deze functie wist een record uit een subtabel op
      * basis van het opgegeven record. Het rangnummer van de subtabel is nodig om te
@@ -1202,7 +1186,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected void deleteSubObject(int subForm) throws B3pCommonsException {
         throw getNoSubFormException(subForm);
     }
-    
+
     /**
      * Een concrete implementatie van deze functie vult het hoofdobject vanuit het form.
      * <p>
@@ -1211,7 +1195,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected void populateObject() throws B3pCommonsException {
         throw new B3pCommonsException("not implemented!");
     }
-    
+
     /**
      * Een concrete implementatie van deze functie vult het subobject vanuit het form.
      * <p>
@@ -1221,7 +1205,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected void populateSubObject(int subForm) throws B3pCommonsException {
         throw getNoSubFormException(subForm);
     }
-    
+
     /**
      * Een concrete implementatie van deze functie zorgt voor het vullen van het form uit het hoofdobject.
      * <p>
@@ -1230,7 +1214,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected void populateForm() throws B3pCommonsException {
         throw new B3pCommonsException("not implemented!");
     }
-    
+
     /**
      * Een concrete implementatie van deze functie zorgt voor het vullen van het form uit het subobject
      * <p>
@@ -1240,7 +1224,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected void populateSubForm(int subForm) throws B3pCommonsException {
         throw getNoSubFormException(subForm);
     }
-    
+
     /**
      * Elk struts formulier maakt gebruik van een aantal lijsten. Ieder dropdown zal via een lijst
      * gevuld worden. Bij gebruik van subtabellen zal voor iedere subtabel een lijst gemaakt moeten
@@ -1255,7 +1239,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected void createLists() throws B3pCommonsException {
         return;
     }
-    
+
     /**
      * Bij een many-to-many relatie wordt voor het hoofdrecord van het struts formulier opgezocht
      * welke records uit de tabel aan de andere zijde van de many-to-many relatie hierbij horen.
@@ -1268,7 +1252,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected void createJoinList() throws B3pCommonsException {
         return;
     }
-    
+
     /**
      * Een concrete implementatie van deze functie creeert een koppeling tussen het hoofdobject en
      * het koppelobject in de database.
@@ -1279,7 +1263,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected void createJoin(int subForm) throws B3pCommonsException {
         throw getNoSubFormException(subForm);
     }
-    
+
     /**
      * Een concrete implementatie van deze functie verbreekt een koppeling tussen het hoofdobject en
      * het koppelobject in de database.
@@ -1290,7 +1274,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     protected void deleteJoin(int subForm) throws B3pCommonsException {
         throw getNoSubFormException(subForm);
     }
-    
+
     /**
      * Configuratie parameter van EditBaseBean welke bepaalt of een save
      * meteen (true) moet worden uitgevoerd of pas na een waarschuwing (false).
@@ -1299,7 +1283,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     public boolean isDirectSave() {
         return directSave;
     }
-    
+
     /**
      * Configuratie parameter van EditBaseBean welke bepaalt of een save
      * meteen (true) moet worden uitgevoerd of pas na een waarschuwing (false).
@@ -1308,7 +1292,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     public void setDirectSave(boolean directSave) {
         this.directSave = directSave;
     }
-    
+
     /**
      * Configuratie parameter van EditBaseBean welke bepaalt of een delete
      * meteen (true) moet worden uitgevoerd of pas na een waarschuwing (false).
@@ -1317,7 +1301,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     public boolean isDirectDelete() {
         return directDelete;
     }
-    
+
     /**
      * Configuratie parameter van EditBaseBean welke bepaalt of een delete
      * meteen (true) moet worden uitgevoerd of pas na een waarschuwing (false).
@@ -1326,7 +1310,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     public void setDirectDelete(boolean directDelete) {
         this.directDelete = directDelete;
     }
-    
+
     /**
      * Configuratie parameter van EditBaseBean welke bepaalt of een subsave
      * meteen (true) moet worden uitgevoerd of pas na een waarschuwing (false).
@@ -1335,7 +1319,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     public boolean isDirectSubSave() {
         return directSubSave;
     }
-    
+
     /**
      * Configuratie parameter van EditBaseBean welke bepaalt of een subsave
      * meteen (true) moet worden uitgevoerd of pas na een waarschuwing (false).
@@ -1344,7 +1328,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     public void setDirectSubSave(boolean directSubSave) {
         this.directSubSave = directSubSave;
     }
-    
+
     /**
      * Configuratie parameter van EditBaseBean welke bepaalt of een subdelete
      * meteen (true) moet worden uitgevoerd of pas na een waarschuwing (false).
@@ -1353,7 +1337,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     public boolean isDirectSubDelete() {
         return directSubDelete;
     }
-    
+
     /**
      * Configuratie parameter van EditBaseBean welke bepaalt of een subdelete
      * meteen (true) moet worden uitgevoerd of pas na een waarschuwing (false).
@@ -1362,7 +1346,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     public void setDirectSubDelete(boolean directSubDelete) {
         this.directSubDelete = directSubDelete;
     }
-    
+
     /**
      * Configuratie parameter van EditBaseBean welke bepaalt of na een subsave
      * terug naar het hoofdformulier teruggegaan moet worden (true) of dat
@@ -1372,7 +1356,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     public boolean isReturnAfterSubSave() {
         return returnAfterSubSave;
     }
-    
+
     /**
      * Configuratie parameter van EditBaseBean welke bepaalt of na een subsave
      * terug naar het hoofdformulier teruggegaan moet worden (true) of dat
@@ -1382,7 +1366,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     public void setReturnAfterSubSave(boolean returnAfterSubSave) {
         this.returnAfterSubSave = returnAfterSubSave;
     }
-    
+
     /**
      * Configuratie parameter van EditBaseBean welke bepaalt of
      * de bebruiker de records mag editten of niet. Indien niet worden
@@ -1392,7 +1376,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     public boolean isAllowEdits() {
         return allowEdits;
     }
-    
+
     /**
      * Configuratie parameter van EditBaseBean welke bepaalt of
      * de bebruiker de records mag editten of niet. Indien niet worden
@@ -1402,5 +1386,4 @@ public abstract class EditBaseBean extends FormBaseBean {
     public void setAllowEdits(boolean allowEdits) {
         this.allowEdits = allowEdits;
     }
-    
 }
