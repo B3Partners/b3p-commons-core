@@ -4,19 +4,19 @@
  * general helper classes and extensions.
  *
  * Copyright 2000 - 2008 B3Partners BV
- * 
+ *
  * This file is part of B3P Commons Core.
- * 
+ *
  * B3P Commons Core is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * B3P Commons Core is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with B3P Commons Core.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -35,8 +35,8 @@ import java.text.StringCharacterIterator;
 import java.text.CharacterIterator;
 
 /* Leest CSV bestanden volgens RFC4180 (http://www.rfc-editor.org/rfc/rfc4180.txt)
- * Quoting met ", in een veld wordt een " geescaped door er nog een " voor te 
- * zetten. Ondersteunt ook velden met een nieuwe regel (uiteraard alleen herkend 
+ * Quoting met ", in een veld wordt een " geescaped door er nog een " voor te
+ * zetten. Ondersteunt ook velden met een nieuwe regel (uiteraard alleen herkend
  * indien deze gequote is).
  *
  * TODO automatisch detecteren separator? (is soms niet mogelijk)
@@ -68,7 +68,7 @@ public class CsvInputStream {
 
     /** Leest het volgende csv record en retourneert de velden als elementen in
      * een String array. Indien er geen record meer is retourneert deze methode
-     * null. 
+     * null.
      *
      * @throws CsvFormatExcpetion Indien het csv bestand ongeldig is, of indien
      * checkColumnCount enabled en het record niet evenveel kolommen heeft als
@@ -110,7 +110,11 @@ public class CsvInputStream {
 
     public String[] readRecord() throws IOException, CsvFormatException {
         List fields = readRecordAsList();
-        return (String[]) fields.toArray(new String[]{});
+        if(fields == null) {
+			return null;
+		} else {
+        	return (String[]) fields.toArray(new String[]{});
+		}
     }
 
     private String getExceptionMessage(String s) {
@@ -201,7 +205,7 @@ public class CsvInputStream {
         } while (true);
     }
 
-    /* geeft het het volgnummer van het laatst gelezen record, beginnend bij 1 
+    /* geeft het het volgnummer van het laatst gelezen record, beginnend bij 1
      * voor het eerste record. Indien er nog geen record is gelezen geeft 0.
      */
     public int getLastRecordNumber() {
