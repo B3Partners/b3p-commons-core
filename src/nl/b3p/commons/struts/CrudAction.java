@@ -204,7 +204,13 @@ public class CrudAction extends ExtendedMethodAction {
 
         ActionForward forward = super.execute(mapping, form, request, response);
         /* Check van token in de implementatie van save en delete */
-        saveToken(request);
+
+        /* indien notoken=true in request params dan niet saveToken(); voor
+         * bijvoorbeeld een printpagina
+         */
+        if(!"true".equals(request.getParameter("notoken"))) {
+            saveToken(request);
+        }
         return forward;
     }
 }
