@@ -52,6 +52,8 @@ public class ASelectFilterAuthenticator implements Authenticator {
     protected SecurityRealmInterface realm;
     protected String realmName;
 
+    public static final String ERROR_NO_ASELECT_TICKET = "Geen A-Select ticket!";
+    public static final String ERROR_USERNAME_NOT_AUTHORIZED = "A-Select gebruiker niet geauthoriseerd voor deze applicatie!";
     /**
      * Initialize this Authenticator.
      *
@@ -88,22 +90,22 @@ public class ASelectFilterAuthenticator implements Authenticator {
             ASelectTicket ticket = ASelectTicket.getFromSession(request.getSession());
 
             if (ticket == null) {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Geen A-Select ticket!");
-                return true;
+                return false;
             }
 
             Principal principal = realm.authenticate(ticket.getUid(), "");
             if (principal != null) {
                 request.setUserPrincipal(principal);
             } else {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN, "A-Select gebruikersnaam niet geauthoriseerd bij deze applicatie, neem contact op met de beheerder!");
-                return true;
+                return false;
             }
         }
         return false;
     }
 
     public void showLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        ASelectTicket ticket = ASelectTicket.getFromSession(request.getSession());
+        response.sendError(HttpServletResponse.SC_FORBIDDEN, ticket == null ? ERROR_NO_ASELECT_TICKET : ERROR_USERNAME_NOT_AUTHORIZED);
     }
 
     /**
