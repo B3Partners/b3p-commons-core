@@ -11,7 +11,7 @@ import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionError;
+import org.apache.struts.action.ActionMessage;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
@@ -181,7 +181,7 @@ public abstract class EditBaseBean extends FormBaseBean {
     public ActionForward process(boolean tokenValid, boolean transactionCancelled, ActionErrors validateErrors) {
 
         if (!isInit) {
-            errors.add(MAIN_MESSAGE, new ActionError("error.invoerenrecord.general"));
+            errors.add(MAIN_MESSAGE, new ActionMessage("error.invoerenrecord.general"));
             return mapping.findForward("failure");
         }
 
@@ -255,7 +255,7 @@ public abstract class EditBaseBean extends FormBaseBean {
 
         } catch (Exception e) {
             log.error("error: ", e);
-            errors.add(MAIN_MESSAGE, new ActionError("error.database", e.getMessage()));
+            errors.add(MAIN_MESSAGE, new ActionMessage("error.database", e.getMessage()));
             return (mapping.findForward("failure"));
         } finally {
             // evt list maken?
@@ -278,7 +278,7 @@ public abstract class EditBaseBean extends FormBaseBean {
             }
         } catch (B3pCommonsException be) {
             log.error("error2: ", be);
-            errors.add(MAIN_MESSAGE, new ActionError("error.invoerenrecord.general", be.getMessage()));
+            errors.add(MAIN_MESSAGE, new ActionMessage("error.invoerenrecord.general", be.getMessage()));
             return mapping.findForward("failure");
         }
 
@@ -311,7 +311,7 @@ public abstract class EditBaseBean extends FormBaseBean {
         if (!isAction(START_ACTION)) {
             // Validate the transactional control token
             if (!tokenValid) {
-                errors.add(MAIN_MESSAGE, new ActionError("error.transaction.token"));
+                errors.add(MAIN_MESSAGE, new ActionMessage("error.transaction.token"));
                 // Report any errors we have discovered back to the original form
                 action = INVALID_ACTION;
                 newAction = EDIT_ACTION;
@@ -410,7 +410,7 @@ public abstract class EditBaseBean extends FormBaseBean {
             }
 
         } else {
-            errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
+            errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.notallowed"));
             newAction = EDIT_ACTION;
         }
         return null;
@@ -436,11 +436,11 @@ public abstract class EditBaseBean extends FormBaseBean {
                 return deleteAction();
             } else {
                 log.debug(" delete");
-                errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.delete"));
+                errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.delete"));
                 newAction = DELETE_ACTION;
             }
         } else {
-            errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
+            errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.notallowed"));
         }
         return null;
     }
@@ -459,9 +459,9 @@ public abstract class EditBaseBean extends FormBaseBean {
                 subObjects.set(subNum - 1, subObject);
             }
             log.debug(" create new");
-//                errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.new"));
+//                errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.new"));
         } else {
-            errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
+            errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.notallowed"));
         }
         newAction = EDIT_ACTION;
         return null;
@@ -474,15 +474,15 @@ public abstract class EditBaseBean extends FormBaseBean {
             } else {
                 if (theObject != null) {
                     log.debug(" save existing");
-                    errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.save"));
+                    errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.save"));
                 } else {
                     log.debug(" create new");
-                    errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.new"));
+                    errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.new"));
                 }
                 newAction = SAVE_ACTION;
             }
         } else {
-            errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
+            errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.notallowed"));
         }
         return null;
     }
@@ -505,7 +505,7 @@ public abstract class EditBaseBean extends FormBaseBean {
             log.debug(" create new");
 
         } else {
-            errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
+            errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.notallowed"));
         }
         return null;
     }
@@ -523,10 +523,10 @@ public abstract class EditBaseBean extends FormBaseBean {
             setSubID(subNum, Integer.toString(TEMPNEW_ID));
             subObject = getNewSubObject(subNum);
             subObjects.set(subNum - 1, subObject);
-//          errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subnew", getSubNames(subNum)));
+//          errors.add(SUB_MESSAGE + subNum, new ActionMessage("warning.invoerenrecord.subnew", getSubNames(subNum)));
             newAction = SUBEDIT_ACTION + subNum;
         } else {
-            errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.notallowed"));
+            errors.add(SUB_MESSAGE + subNum, new ActionMessage("warning.invoerenrecord.notallowed"));
             newAction = EDIT_ACTION;
         }
         return null;
@@ -541,15 +541,15 @@ public abstract class EditBaseBean extends FormBaseBean {
             } else {
                 if (subObject != null) {
                     log.debug(" subsave existing");
-                    errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subsave", getSubNames(subNum)));
+                    errors.add(SUB_MESSAGE + subNum, new ActionMessage("warning.invoerenrecord.subsave", getSubNames(subNum)));
                 } else {
                     log.debug(" create subnew");
-                    errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subnew", getSubNames(subNum)));
+                    errors.add(SUB_MESSAGE + subNum, new ActionMessage("warning.invoerenrecord.subnew", getSubNames(subNum)));
                 }
                 newAction = SUBSAVE_ACTION + subNum;
             }
         } else {
-            errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.notallowed"));
+            errors.add(SUB_MESSAGE + subNum, new ActionMessage("warning.invoerenrecord.notallowed"));
         }
         return null;
     }
@@ -566,7 +566,7 @@ public abstract class EditBaseBean extends FormBaseBean {
             subObjects.set(subNum - 1, subObject);
 
         } else {
-            errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.notallowed"));
+            errors.add(SUB_MESSAGE + subNum, new ActionMessage("warning.invoerenrecord.notallowed"));
         }
         return null;
     }
@@ -579,10 +579,10 @@ public abstract class EditBaseBean extends FormBaseBean {
                 return subDeleteAction(subNum);
             }
             log.debug(" delete subrecord");
-            errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subdelete", getSubNames(subNum)));
+            errors.add(SUB_MESSAGE + subNum, new ActionMessage("warning.invoerenrecord.subdelete", getSubNames(subNum)));
             newAction = SUBDELETE_ACTION + subNum;
         } else {
-            errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.notallowed"));
+            errors.add(SUB_MESSAGE + subNum, new ActionMessage("warning.invoerenrecord.notallowed"));
             newAction = EDIT_ACTION;
         }
         return null;
@@ -592,11 +592,11 @@ public abstract class EditBaseBean extends FormBaseBean {
         Object subObject = (Object) subObjects.get(subNum - 1);
         if (subObject != null) {
             log.debug(" edit subrecord");
-//                            errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subedit", getSubNames(subNum)));
+//                            errors.add(SUB_MESSAGE + subNum, new ActionMessage("warning.invoerenrecord.subedit", getSubNames(subNum)));
             newAction = SUBEDIT_ACTION + subNum;
         } else {
             log.debug(" edit subrecord, but no subrecord present");
-//                            errors.add(SUB_MESSAGE + subNum, new ActionError("error.invoerenrecord.nosubedit", getSubNames(subNum)));
+//                            errors.add(SUB_MESSAGE + subNum, new ActionMessage("error.invoerenrecord.nosubedit", getSubNames(subNum)));
         }
         return null;
     }
@@ -605,7 +605,7 @@ public abstract class EditBaseBean extends FormBaseBean {
         if (isAction(EDIT_ACTION) && allowEdits) {
             createJoin(subNum);
         } else {
-            errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
+            errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.notallowed"));
             newAction = EDIT_ACTION;
         }
         return null;
@@ -615,7 +615,7 @@ public abstract class EditBaseBean extends FormBaseBean {
         if (isAction(EDIT_ACTION) && allowEdits) {
             deleteJoin(subNum);
         } else {
-            errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
+            errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.notallowed"));
             newAction = EDIT_ACTION;
         }
         return null;
@@ -649,7 +649,7 @@ public abstract class EditBaseBean extends FormBaseBean {
         newAction = EDIT_ACTION;
 
         if (directDelete) {
-            errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.deletedone"));
+            errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.deletedone"));
         }
         return null;
     }
@@ -671,7 +671,7 @@ public abstract class EditBaseBean extends FormBaseBean {
         newAction = EDIT_ACTION;
 
         if (directSubDelete) {
-            errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subdeletedone", getSubNames(subNum)));
+            errors.add(SUB_MESSAGE + subNum, new ActionMessage("warning.invoerenrecord.subdeletedone", getSubNames(subNum)));
         }
         return null;
     }
@@ -690,7 +690,7 @@ public abstract class EditBaseBean extends FormBaseBean {
         // validatie
         if (reduceMainErrors(validateErrors)) {
             log.info("Validation error!");
-            errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.savewitherrors"));
+            errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.savewitherrors"));
             newAction = SAVE_ACTION;
         } else {
             // Het hoofdobject wordt alleen aangemaakt, indien
@@ -706,7 +706,7 @@ public abstract class EditBaseBean extends FormBaseBean {
             }
             newAction = EDIT_ACTION;
             if (directSave) {
-                errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.savedone"));
+                errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.savedone"));
             }
         }
         return null;
@@ -726,7 +726,7 @@ public abstract class EditBaseBean extends FormBaseBean {
         // validatie
         if (reduceSubErrors(subNum, validateErrors)) {
             log.info("Validation error subform!");
-            errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subsavewitherrors", getSubNames(subNum)));
+            errors.add(SUB_MESSAGE + subNum, new ActionMessage("warning.invoerenrecord.subsavewitherrors", getSubNames(subNum)));
             newAction = subSaveAction;
         } else {
             // Een nieuw subobject wordt alleen aangemaakt indien
@@ -746,7 +746,7 @@ public abstract class EditBaseBean extends FormBaseBean {
                 newAction = subEditAction;
             }
             if (directSubSave) {
-                errors.add(SUB_MESSAGE + subNum, new ActionError("warning.invoerenrecord.subsavedone", getSubNames(subNum)));
+                errors.add(SUB_MESSAGE + subNum, new ActionMessage("warning.invoerenrecord.subsavedone", getSubNames(subNum)));
             }
         }
         return null;
@@ -799,7 +799,7 @@ public abstract class EditBaseBean extends FormBaseBean {
         newAction = EDIT_ACTION;
 
         if (directSave) {
-            errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.savedone"));
+            errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.savedone"));
         }
         return null;
     }

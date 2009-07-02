@@ -27,9 +27,9 @@ import java.util.Locale;
 import javax.servlet.jsp.JspException;
 import org.apache.struts.Globals;
 import org.apache.struts.util.MessageResources;
-import org.apache.struts.util.RequestUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 
+import org.apache.struts.taglib.TagUtils;
 import org.apache.struts.taglib.html.LinkTag;
 
 /**
@@ -179,7 +179,7 @@ public class LinkBeanTag extends LinkTag {
             }
 
             // Retrieve the message string we are looking for
-            String message = RequestUtils.message(pageContext, this.bundle, this.localeKey, key);
+            String message = TagUtils.getInstance().message(pageContext, this.bundle, this.localeKey, key);
             if (message != null && message.length() > 0) {
                 text = message;
             } else if (key != null) {

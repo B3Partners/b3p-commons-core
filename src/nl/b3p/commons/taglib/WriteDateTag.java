@@ -31,13 +31,11 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.struts.util.RequestUtils;
-import org.apache.struts.util.ResponseUtils;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import nl.b3p.commons.services.*;
+import org.apache.struts.taglib.TagUtils;
 
 /**
  * Tag die een dtum volgens de locale print, indien het een datum is.
@@ -96,11 +94,11 @@ public class WriteDateTag extends TagSupport {
         Object value = null;
         if (name != null) {
             // er zou een datum te vinden moeten zijn
-            if (RequestUtils.lookup(pageContext, name, scope) == null) {
+            if (TagUtils.getInstance().lookup(pageContext, name, scope) == null) {
                 return (SKIP_BODY);  // Nothing to output
             // Look up the requested property value
             }
-            value = RequestUtils.lookup(pageContext, name, property, scope);
+            value = TagUtils.getInstance().lookup(pageContext, name, property, scope);
         }
         if (value == null) {
             // een voorbeeld datum met locale wordt afgedrukt
@@ -150,7 +148,7 @@ public class WriteDateTag extends TagSupport {
                 }
             }
         }
-        ResponseUtils.write(pageContext, output);
+        TagUtils.getInstance().write(pageContext, output);
 
         // Continue processing this page
         return (SKIP_BODY);

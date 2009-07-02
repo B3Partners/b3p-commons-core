@@ -23,9 +23,9 @@
 package nl.b3p.commons.taglib;
 
 import javax.servlet.jsp.JspException;
-import org.apache.struts.util.RequestUtils;
 import org.apache.struts.taglib.html.*;
 import java.util.*;
+import org.apache.struts.taglib.TagUtils;
 
 /**
  * Custom tag for autonumber input field.
@@ -53,7 +53,7 @@ public class AutonumberTag extends HiddenTag {
      */
     public int doStartTag() throws JspException {
 
-        Object oldvalue = RequestUtils.lookup(pageContext, name, property, null);
+        Object oldvalue = TagUtils.getInstance().lookup(pageContext, name, property, null);
         if (oldvalue == null || (oldvalue instanceof String && ((String) oldvalue).length() == 0)) {
             Calendar start = Calendar.getInstance();
             start.clear();

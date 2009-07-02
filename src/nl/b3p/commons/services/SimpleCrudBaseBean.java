@@ -26,10 +26,11 @@ import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionError;
+import org.apache.struts.action.ActionMessage;
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.apache.struts.action.ActionMessage;
 import org.apache.struts.action.ActionMessages;
 import org.apache.struts.util.MessageResources;
 import org.apache.struts.validator.DynaValidatorForm;
@@ -122,7 +123,7 @@ public abstract class SimpleCrudBaseBean extends FormBaseBean {
     public ActionForward processAction(boolean tokenValid, boolean transactionCancelled, ActionErrors validateErrors) {
 
         if (!isInit) {
-            errors.add(MAIN_MESSAGE, new ActionError("error.invoerenrecord.general"));
+            errors.add(MAIN_MESSAGE, new ActionMessage("error.invoerenrecord.general"));
             return mapping.findForward("failure");
         }
 
@@ -162,7 +163,7 @@ public abstract class SimpleCrudBaseBean extends FormBaseBean {
         try {
             createLists();
         } catch (B3pCommonsException be) {
-            errors.add(MAIN_MESSAGE, new ActionError("error.invoerenrecord.general"));
+            errors.add(MAIN_MESSAGE, new ActionMessage("error.invoerenrecord.general"));
             return mapping.findForward("failure");
         }
 
@@ -200,7 +201,7 @@ public abstract class SimpleCrudBaseBean extends FormBaseBean {
         if (!isAction(START_ACTION)) {
             // Validate the transactional control token
             if (!tokenValid) {
-                errors.add(MAIN_MESSAGE, new ActionError("error.transaction.token"));
+                errors.add(MAIN_MESSAGE, new ActionMessage("error.transaction.token"));
                 // Report any errors we have discovered back to the original form
                 action = INVALID_ACTION;
                 newAction = EDIT_ACTION;
@@ -255,16 +256,16 @@ public abstract class SimpleCrudBaseBean extends FormBaseBean {
                     if (log.isDebugEnabled()) {
                         log.debug(" process this, save existing");
                     }
-                    errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.save"));
+                    errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.save"));
                 } else {
                     if (log.isDebugEnabled()) {
                         log.debug(" process this, create new");
                     }
-                    errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.new"));
+                    errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.new"));
                 }
                 newAction = SAVE_ACTION;
             } else {
-                errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
+                errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.notallowed"));
                 newAction = EDIT_ACTION;
             }
         }
@@ -289,7 +290,7 @@ public abstract class SimpleCrudBaseBean extends FormBaseBean {
             if (allowEdits) {
                 return deleteAction();
             } else {
-                errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
+                errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.notallowed"));
                 newAction = EDIT_ACTION;
             }
         }
@@ -320,7 +321,7 @@ public abstract class SimpleCrudBaseBean extends FormBaseBean {
             if (log.isErrorEnabled()) {
                 log.error("  Database error deleting: ", dbe);
             }
-            errors.add(MAIN_MESSAGE, new ActionError("error.database", dbe.getMessage()));
+            errors.add(MAIN_MESSAGE, new ActionMessage("error.database", dbe.getMessage()));
             return (mapping.findForward("failure"));
         }
         if (log.isDebugEnabled()) {
@@ -330,7 +331,7 @@ public abstract class SimpleCrudBaseBean extends FormBaseBean {
         newAction = EDIT_ACTION;
 
         if (directDelete) {
-            errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.deletedone"));
+            errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.deletedone"));
         }
         return null;
     }
@@ -346,7 +347,7 @@ public abstract class SimpleCrudBaseBean extends FormBaseBean {
             if (allowEdits) {
                 return saveAction(validateErrors);
             } else {
-                errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
+                errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.notallowed"));
                 newAction = EDIT_ACTION;
             }
         }
@@ -375,7 +376,7 @@ public abstract class SimpleCrudBaseBean extends FormBaseBean {
             if (log.isInfoEnabled()) {
                 log.info("Validation error!");
             }
-            errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.savewitherrors"));
+            errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.savewitherrors"));
             newAction = SAVE_ACTION;
         } else {
             try {
@@ -395,12 +396,12 @@ public abstract class SimpleCrudBaseBean extends FormBaseBean {
                 if (log.isErrorEnabled()) {
                     log.error("  Database error creating object: ", dbe);
                 }
-                errors.add(MAIN_MESSAGE, new ActionError("error.database", dbe.getMessage()));
+                errors.add(MAIN_MESSAGE, new ActionMessage("error.database", dbe.getMessage()));
                 return (mapping.findForward("failure"));
             }
             newAction = EDIT_ACTION;
             if (directSave) {
-                errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.savedone"));
+                errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.savedone"));
             }
         }
         return null;
@@ -436,10 +437,10 @@ public abstract class SimpleCrudBaseBean extends FormBaseBean {
                     }
                     if (log.isDebugEnabled()) {
                         log.debug(" create new");
-//                errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.new"));
+//                errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.new"));
                     }
                 } else {
-                    errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
+                    errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.notallowed"));
                 }
                 newAction = EDIT_ACTION;
             }
@@ -456,24 +457,24 @@ public abstract class SimpleCrudBaseBean extends FormBaseBean {
                             if (log.isInfoEnabled()) {
                                 log.info("Validation error!");
                             }
-                            errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.savewitherrors"));
+                            errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.savewitherrors"));
                         } else {
                             if (theObject != null) {
                                 if (log.isDebugEnabled()) {
                                     log.debug(" save existing");
                                 }
-                                errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.save"));
+                                errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.save"));
                             } else {
                                 if (log.isDebugEnabled()) {
                                     log.debug(" create new");
                                 }
-                                errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.new"));
+                                errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.new"));
                             }
                         }
                         newAction = SAVE_ACTION;
                     }
                 } else {
-                    errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
+                    errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.notallowed"));
                 }
             }
             // delete dit record
@@ -489,17 +490,17 @@ public abstract class SimpleCrudBaseBean extends FormBaseBean {
                             if (log.isDebugEnabled()) {
                                 log.debug(" delete");
                             }
-                            errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.delete"));
+                            errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.delete"));
                             newAction = DELETE_ACTION;
                         } else {
                             if (log.isDebugEnabled()) {
                                 log.debug(" delete, but no record");
                             }
-                            errors.add(MAIN_MESSAGE, new ActionError("error.invoerenrecord.nodelete"));
+                            errors.add(MAIN_MESSAGE, new ActionMessage("error.invoerenrecord.nodelete"));
                         }
                     }
                 } else {
-                    errors.add(MAIN_MESSAGE, new ActionError("warning.invoerenrecord.notallowed"));
+                    errors.add(MAIN_MESSAGE, new ActionMessage("warning.invoerenrecord.notallowed"));
                 }
             }
             if (buttonPressed(CANCEL_BUTTON)) {
@@ -532,7 +533,7 @@ public abstract class SimpleCrudBaseBean extends FormBaseBean {
                 }
             }
         } catch (B3pCommonsException pe) {
-            errors.add(MAIN_MESSAGE, new ActionError("error.invoerenrecord.general"));
+            errors.add(MAIN_MESSAGE, new ActionMessage("error.invoerenrecord.general"));
             return mapping.findForward("failure");
         }
         return null;
@@ -562,7 +563,7 @@ public abstract class SimpleCrudBaseBean extends FormBaseBean {
         try {
             setForm("action", newAction);
         } catch (B3pCommonsException pe) {
-            errors.add(MAIN_MESSAGE, new ActionError("error.invoerenrecord.general"));
+            errors.add(MAIN_MESSAGE, new ActionMessage("error.invoerenrecord.general"));
         }
         return;
     }

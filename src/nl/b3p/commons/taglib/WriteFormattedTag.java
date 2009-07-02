@@ -34,13 +34,11 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.struts.util.RequestUtils;
-import org.apache.struts.util.ResponseUtils;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import nl.b3p.commons.services.*;
+import org.apache.struts.taglib.TagUtils;
 
 /**
  * Tag die een tekstveld probeert te formateren volgens een opgegeven
@@ -122,11 +120,11 @@ public class WriteFormattedTag extends TagSupport {
         // Look up the requested bean
         Object value = null;
         if (name != null) {
-            if (RequestUtils.lookup(pageContext, name, scope) == null) {
+            if (TagUtils.getInstance().lookup(pageContext, name, scope) == null) {
                 return (SKIP_BODY);  // Nothing to output
             // Look up the requested property value
             }
-            value = RequestUtils.lookup(pageContext, name, property, scope);
+            value = TagUtils.getInstance().lookup(pageContext, name, property, scope);
         }
 
         // Get locale of this request for date printing
@@ -246,7 +244,7 @@ public class WriteFormattedTag extends TagSupport {
         if (log.isDebugEnabled()) {
             log.debug("Output: " + output);
         }
-        ResponseUtils.write(pageContext, output);
+        TagUtils.getInstance().write(pageContext, output);
 
         // Continue processing this page
         return (SKIP_BODY);

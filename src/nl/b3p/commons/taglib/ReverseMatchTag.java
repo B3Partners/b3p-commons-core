@@ -28,7 +28,7 @@ import org.apache.struts.taglib.logic.*;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
-import org.apache.struts.util.RequestUtils;
+import org.apache.struts.taglib.TagUtils;
 
 /**
  * Evalute the nested body content of this tag if the specified value
@@ -122,7 +122,7 @@ public class ReverseMatchTag extends ConditionalTagBase {
                     ((HttpServletRequest) pageContext.getRequest()).getHeader(header);
         } else if (name != null) {
             Object value =
-                    RequestUtils.lookup(pageContext, name, property, scope);
+                    TagUtils.getInstance().lookup(pageContext, name, property, scope);
             if (value != null) {
                 variable = value.toString();
             }
@@ -130,12 +130,12 @@ public class ReverseMatchTag extends ConditionalTagBase {
             variable = pageContext.getRequest().getParameter(parameter);
         } else {
             JspException e = new JspException("Error logic selector");
-            RequestUtils.saveException(pageContext, e);
+            TagUtils.getInstance().saveException(pageContext, e);
             throw e;
         }
         if (variable == null) {
             JspException e = new JspException("Error logic variable:" + value);
-            RequestUtils.saveException(pageContext, e);
+            TagUtils.getInstance().saveException(pageContext, e);
             throw e;
         }
 
@@ -156,7 +156,7 @@ public class ReverseMatchTag extends ConditionalTagBase {
             matched = value.endsWith(variable);
         } else {
             JspException e = new JspException("Error logic location: " + location);
-            RequestUtils.saveException(pageContext, e);
+            TagUtils.getInstance().saveException(pageContext, e);
             throw e;
         }
 
