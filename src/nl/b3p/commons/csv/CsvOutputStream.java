@@ -92,7 +92,7 @@ public class CsvOutputStream {
     /* TODO omschrijven naar JUnit test */
     public static void main(String[] args) throws IOException {
         CsvOutputStream csv = new CsvOutputStream(new OutputStreamWriter(System.out));
-        csv.writeRecord(new String[]{"test", "t\"est", "tëst", "\"", "\"\"", "\"test\"", "te\nst", "te,st"});
+        csv.writeRecord(new String[]{"test", "t\"est", "tÃ©st", "\"", "\"\"", "\"test\"", "te\nst", "te,st"});
         csv.flush();
     }
 }

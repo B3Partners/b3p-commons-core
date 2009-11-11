@@ -447,7 +447,7 @@ public class ASelectAuthorizationFilter implements Filter, ASelectConstants {
 
             /* Sla de originele URL op in sessie. De URL die we aan de A-Select 
              * Agent geven is een URL die we zelf verzinnen waardoor we zeker 
-             * weten dat deze niet meer dan één URL parameter bevat (omdat een 
+             * weten dat deze niet meer dan Ã©Ã©n URL parameter bevat (omdat een
              * URL met een & erin door een bug in de A-Select Agent niet goed 
              * wordt terug geredirect)
              */
