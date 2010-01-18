@@ -125,7 +125,7 @@ public class JpaUtilServlet implements Servlet {
      * completed, the entity manager is closed using closeThreadEntityManager()!
      *
      * @see getThreadEntityManager(String)
-     *
+     * 
      * @return an EntityManager for the default persistence unit
      */
     public static EntityManager getThreadEntityManager() throws IllegalArgumentException {
@@ -153,7 +153,7 @@ public class JpaUtilServlet implements Servlet {
      * It's important that when the unit-of-work of the current thread is
      * completed, the entity manager is closed using closeThreadEntityManager()!
      *
-     * @return an EntityManager for the specified persistence unit
+     * @return an EntityManager for the specified persistence unit 
      */
     public static EntityManager getThreadEntityManager(String persistenceUnit) {
         Map<String,EntityManager> ems = entityManagers.get();
@@ -164,20 +164,34 @@ public class JpaUtilServlet implements Servlet {
 
         EntityManager em = ems.get(persistenceUnit);
         if(em == null) {
-            EntityManagerFactory emf;
-            synchronized(entityManagerFactories) {
-                emf = entityManagerFactories.get(persistenceUnit);
-                if(emf == null) {
-                    log.info("Initializing entity manager factory for persistance unit " + persistenceUnit);
-                    emf = Persistence.createEntityManagerFactory(persistenceUnit);
-                    entityManagerFactories.put(persistenceUnit, emf);
-                }
-            }
+            EntityManagerFactory emf = getEntityManagerFactory(persistenceUnit);
+
             em = emf.createEntityManager();
             ems.put(persistenceUnit, em);
         }
 
         return em;
+    }
+
+    public static EntityManagerFactory getEntityManagerFactory() {
+        if(defaultPersistenceUnit == null) {
+            throw new IllegalArgumentException("No default persistence unit configured");
+        }
+
+        return getEntityManagerFactory(defaultPersistenceUnit);
+    }
+
+    public static EntityManagerFactory getEntityManagerFactory(String persistenceUnit) {
+        EntityManagerFactory emf = null;
+        synchronized(entityManagerFactories) {
+            emf = entityManagerFactories.get(persistenceUnit);
+            if(emf == null) {
+                log.info("Initializing entity manager factory for persistance unit " + persistenceUnit);
+                emf = Persistence.createEntityManagerFactory(persistenceUnit);
+                entityManagerFactories.put(persistenceUnit, emf);
+            }
+        }
+        return emf;
     }
 
     public static void closeThreadEntityManager() {
@@ -187,7 +201,7 @@ public class JpaUtilServlet implements Servlet {
 
         closeThreadEntityManager(defaultPersistenceUnit);
     }
-
+    
     public static void closeThreadEntityManager(String persistenceUnit) {
         Map<String,EntityManager> ems = entityManagers.get();
         if(ems != null) {
