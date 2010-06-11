@@ -60,6 +60,8 @@ public class CrudAction extends ExtendedMethodAction {
     protected static final String SAVE = "save";
     protected static final String EDIT = "edit";
     protected static final String LIST = "list";
+    protected static final String HASTHEMAS_ERROR_KEY = "error.hasthemas";
+    protected static final String HASCHILDCLUSTER_ERROR_KEY = "error.haschildcluster";
 
     protected Map getActionMethodPropertiesMap() {
         Map map = new HashMap();
