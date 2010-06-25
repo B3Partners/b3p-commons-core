@@ -11,7 +11,7 @@ import org.geotools.util.logging.Logging;
 /**
  * Configureer in web.xml als:
     <listener>
-        <listener-class>nl.openwion.util.GeoToolsLoggingInitializer</listener-class>
+        <listener-class>nl.b3p.commons.geotools.GeoToolsLoggingInitializer</listener-class>
     </listener>
  *
  * Voorbeeld log4j.properties:
