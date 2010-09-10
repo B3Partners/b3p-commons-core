@@ -66,6 +66,10 @@ public abstract class ExtendedMethodAction extends MethodPropertiesAction {
     }
 
     protected void addDefaultMessage(ActionMapping mapping, HttpServletRequest request) {
+        addDefaultMessage(mapping, request, null);
+    }
+
+    protected void addDefaultMessage(ActionMapping mapping, HttpServletRequest request, String attribute) {
         String defaultMessagekey = null;
 
         ExtendedMethodProperties props = (ExtendedMethodProperties) getMethodProperties(request);
@@ -74,7 +78,11 @@ public abstract class ExtendedMethodAction extends MethodPropertiesAction {
         }
 
         if (defaultMessagekey != null) {
-            addMessage(request, defaultMessagekey);
+            if (attribute!=null) {
+                addAttributeMessage(request, attribute, defaultMessagekey);
+            } else {
+                addMessage(request, defaultMessagekey);
+            }
         }
     }
 
