@@ -6,6 +6,8 @@ package nl.b3p.commons.geotools;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.geotools.util.logging.Logging;
 
 /**
@@ -35,6 +37,11 @@ public class GeoToolsLoggingInitializer implements ServletContextListener {
             }
         }
 
+        /* De INFO messages van deze logger zijn niet erg boeiend en zorgen
+         * voor een boel logregels.
+         */
+        Logger l = Logger.getRootLogger().getLoggerRepository().getLogger("org.geotools.factory");
+        l.setLevel(Level.WARN);
     }
 
     public void contextDestroyed(ServletContextEvent sce) {
