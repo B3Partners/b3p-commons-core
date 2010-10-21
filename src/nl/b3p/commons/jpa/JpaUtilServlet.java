@@ -62,7 +62,6 @@ public class JpaUtilServlet implements Servlet {
 
     private static String defaultPersistenceUnit;
 
-    @Override
     public String getServletInfo() {
         return this.getClass().getName();
     }
