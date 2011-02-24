@@ -15,7 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Voor gebruik: zie de wiki. Howto's -> ArcObjects
+ * Voor gebruik: zie de wiki. Howto -> Gebruik van ArcObjects in Java
  *
  * @author Erik
  */
@@ -87,8 +87,6 @@ public class ArcGISConnector implements ServletContextListener {
         }
     }
 
-
-
     public void contextDestroyed(ServletContextEvent sce) {
         try {
             if (arcGISInitializer != null)
@@ -97,5 +95,4 @@ public class ArcGISConnector implements ServletContextListener {
             log.error("Error shutting down ArcObjects connection", e);
         }
     }
-
 }
