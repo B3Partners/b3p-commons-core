@@ -4,6 +4,7 @@
 
 package nl.b3p.commons.stripes;
 
+import java.beans.Statement;
 import java.lang.reflect.Method;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -105,6 +106,14 @@ public class JpaTransactionInterceptor implements Interceptor {
 
                     log.debug("Starting transaction for ActionBean " + bean.getClass().getName());
                     startTransaction(ctx, persistenceUnit);
+
+                    try {
+                        Statement stmt = new Statement(bean, "setEntityManager", new Object[] { getEntityManager(ctx) });
+                        stmt.execute();
+                        log.debug("Injected entityManager property in ActionBean " + bean.getClass().toString());
+                    } catch(Exception e) {
+                        log.debug("Error injecting entityManager property in ActionBean " + bean.getClass().toString());
+                    }
                 }
             }
         } else if(ctx.getLifecycleStage() == LifecycleStage.HandlerResolution) {
