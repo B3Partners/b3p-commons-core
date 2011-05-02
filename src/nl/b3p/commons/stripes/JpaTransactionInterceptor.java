@@ -25,9 +25,6 @@ import org.apache.commons.logging.LogFactory;
  * Indien de ActionBean een Transactional annotatie heeft, na de ActionBeanResolution
  * lifecycle state.
  *
- * Indien de ActionBean geen Transactional annotatie heeft maar de handler methode
- * wel, na de HandlerResolution state.
- *
  * De transactie wordt gecommit:
  *
  * Indien de geproduceerde Resolution een attribuut JpaTransactionInterceptor.OPEN_SESSION_IN_VIEW
@@ -49,15 +46,12 @@ import org.apache.commons.logging.LogFactory;
  * null dan wordt de default persistence unit (configureerd bij JpaUtilServlet)
  * gebruikt.
  *
- * Indien de ActionBean een Transactional annotatie hebt wordt altijd een
- * transactie gestart, annotaties op een event handler worden genegeerd.
- *
  * Let op! Gebruik van de useActionBean tag in view op een bean die een @Transactional
  * annotatie heeft zorgt ervoor dat een eventuele open-session-in-view gesloten
  * wordt na de tag! Bij een closed-session-in-view wordt voor de bean een nieuwe
  * transactie gestart en gecommit.
  */
-@Intercepts({LifecycleStage.ActionBeanResolution, LifecycleStage.HandlerResolution, LifecycleStage.EventHandling, LifecycleStage.RequestComplete})
+@Intercepts({LifecycleStage.ActionBeanResolution, LifecycleStage.EventHandling, LifecycleStage.RequestComplete})
 public class JpaTransactionInterceptor implements Interceptor {
     private static final Log log = LogFactory.getLog(JpaTransactionInterceptor.class);
 
@@ -114,24 +108,6 @@ public class JpaTransactionInterceptor implements Interceptor {
                     } catch(Exception e) {
                         log.debug("Error injecting entityManager property in ActionBean " + bean.getClass().toString());
                     }
-                }
-            }
-        } else if(ctx.getLifecycleStage() == LifecycleStage.HandlerResolution) {
-            /* Indien de ActionBean geen @Transactional annotation had, is
-             * het nog wel mogelijk om op de handler een @Transactional
-             * annotation te hebben.
-             */
-
-            Method m = ctx.getHandler();
-            if(m != null && m.isAnnotationPresent(Transactional.class)) {
-                String persistenceUnit = m.getAnnotation(Transactional.class).persistenceUnit();
-
-                String name =  m.getDeclaringClass().getName() + "." + m.getName();
-                if(getActiveTransactionPersistenceUnit(ctx) != null) {
-                    log.debug("Transaction already started - either for ActionBean or open-session-in-view with useActionBean tag - not starting another transaction for method " + name);
-                } else {
-                    log.debug("Starting transaction for event handler " + name);
-                    startTransaction(ctx, persistenceUnit);
                 }
             }
         } else if(ctx.getLifecycleStage() == LifecycleStage.EventHandling) {
