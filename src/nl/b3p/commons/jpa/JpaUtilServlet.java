@@ -66,6 +66,10 @@ public class JpaUtilServlet implements Servlet {
         return this.getClass().getName();
     }
 
+    public static void setDefaultPersistenceUnit(String pu) {
+        defaultPersistenceUnit = pu;
+    }
+    
     public void init(ServletConfig config) throws ServletException {
         this.config = config;
 
