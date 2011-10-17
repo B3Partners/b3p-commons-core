@@ -44,7 +44,19 @@ import javax.servlet.http.HttpServletResponseWrapper;
  *
  * Als de init-param "httpOnly" op "true" staat wordt URL rewriting wel
  * toegepast (indien geen cookies) voor requests met het "https" scheme.
+ *
+ * @deprecated Door nieuwe versies van Tomcat 6 en Tomcat 7 niet meer nodig:
+ * <p>
+ * Tomcat 6: {@code <Context path="/myapp" disableURLRewriting="true" ...>}<br>
+ * Zie <a href="http://tomcat.apache.org/tomcat-6.0-doc/config/context.html">Context configuration</a>
+ * <p>
+ * Tomcat 7: In web.xml opnemen:
+ * <pre>&lt;session-config&gt;
+ *     &lt;tracking-mode&gt;COOKIE&lt;/tracking-mode&gt;
+ * &lt;/session-config&gt;
+ * </pre>
  */
+@Deprecated
 public class NoUrlRewritingFilter implements Filter {
 
     private boolean httpOnly;
