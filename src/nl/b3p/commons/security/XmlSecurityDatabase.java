@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -41,20 +41,21 @@ import org.exolab.castor.xml.*;
  */
 public class XmlSecurityDatabase extends HttpServlet {
 
-    private static Log log = null;
+    private static final Log log = LogFactory.getLog(XmlSecurityDatabase.class);
+    
     private static WebappUsers securityDatabase = null;
-    private static Hashtable userpasswords = null;
-    private static Hashtable userroles = null;
+    private static HashMap userpasswords = null;
+    private static HashMap userroles = null;
     private static int maxNumOfSessions = 0;
     private static boolean initialized = false;
 
     /** Initializes the servlet.
      */
+    @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-
-        // Zet de logger
-        log = LogFactory.getLog(this.getClass());
+        
+        // log = LogFactory.getLog(this.getClass());
         // Initialize Torque
         try {
             String configLocation = getServletContext().getRealPath(config.getInitParameter("config"));
@@ -84,11 +85,11 @@ public class XmlSecurityDatabase extends HttpServlet {
                 log.debug("Xml Database is not null.");
             }
             maxNumOfSessions = securityDatabase.getMaxsessions();
-            if (log.isInfoEnabled()) {
-                log.info("Max number of active sessions: " + maxNumOfSessions + " (0 = no limit)");
-            }
-            userpasswords = new Hashtable();
-            userroles = new Hashtable();
+            
+            log.debug("Max number of active sessions: " + maxNumOfSessions + " (0 = no limit)");
+            
+            userpasswords = new HashMap();
+            userroles = new HashMap();
             int userCount = securityDatabase.getUserCount();
             for (int i = 0; i < userCount; i++) {
                 User aUser = null;
@@ -127,7 +128,7 @@ public class XmlSecurityDatabase extends HttpServlet {
             }
             initialized = true;
             if (log.isInfoEnabled()) {
-                log.info("Initializing Xml Security Database servlet");
+                log.debug("Initializing Xml Security Database servlet");
             }
         } else {
             System.out.println("XML Security Database servlet not initialized!");
@@ -137,6 +138,7 @@ public class XmlSecurityDatabase extends HttpServlet {
 
     /** Destroys the servlet.
      */
+    @Override
     public void destroy() {
         securityDatabase = null;
         userpasswords = null;
@@ -159,6 +161,7 @@ public class XmlSecurityDatabase extends HttpServlet {
      * @param request servlet request
      * @param response servlet response
      */
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, java.io.IOException {
         processRequest(request, response);
@@ -168,6 +171,7 @@ public class XmlSecurityDatabase extends HttpServlet {
      * @param request servlet request
      * @param response servlet response
      */
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, java.io.IOException {
         processRequest(request, response);
@@ -245,6 +249,7 @@ public class XmlSecurityDatabase extends HttpServlet {
 
     /** Returns a short description of the servlet.
      */
+    @Override
     public String getServletInfo() {
         return "XML Security Database servlet";
     }
