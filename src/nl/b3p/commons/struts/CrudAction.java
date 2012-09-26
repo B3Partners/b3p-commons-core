@@ -59,6 +59,7 @@ public class CrudAction extends ExtendedMethodAction {
     protected static final String CREATE = "create";
     protected static final String SAVE = "save";
     protected static final String EDIT = "edit";
+    protected static final String CANCEL = "cancel";
     protected static final String LIST = "list";
 
     protected Map getActionMethodPropertiesMap() {
@@ -94,6 +95,11 @@ public class CrudAction extends ExtendedMethodAction {
         crudProp.setDefaultForwardName(SUCCESS);
         crudProp.setAlternateForwardName(LISTFW);
         map.put(CREATE, crudProp);
+        
+        crudProp = new ExtendedMethodProperties(CANCEL);
+        crudProp.setDefaultForwardName(SUCCESS);
+        crudProp.setAlternateForwardName(LISTFW);
+        map.put(CANCEL, crudProp);
 
         crudProp = new ExtendedMethodProperties(SAVE);
         crudProp.setDefaultForwardName(SUCCESS);
@@ -130,6 +136,12 @@ public class CrudAction extends ExtendedMethodAction {
     }
 
     public ActionForward unspecified(ActionMapping mapping, DynaValidatorForm dynaForm, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        prepareMethod(dynaForm, request, EDIT, LIST);
+        addDefaultMessage(mapping, request);
+        return mapping.findForward(SUCCESS);
+    }
+    
+    public ActionForward cancel(ActionMapping mapping, DynaValidatorForm dynaForm, HttpServletRequest request, HttpServletResponse response) throws Exception {
         prepareMethod(dynaForm, request, EDIT, LIST);
         addDefaultMessage(mapping, request);
         return mapping.findForward(SUCCESS);
