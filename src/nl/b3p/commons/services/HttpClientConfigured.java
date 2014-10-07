@@ -30,7 +30,7 @@ import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
  * @author Chris
  */
 public class HttpClientConfigured {
-    private final static int maxResponseTime = 0;
+    private final static int maxResponseTime = 20000; //0=infinite
     private HttpClient httpClient;
     private HttpClientContext httpContext;
 
