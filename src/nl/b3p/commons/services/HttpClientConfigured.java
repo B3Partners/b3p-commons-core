@@ -5,6 +5,10 @@ import java.net.MalformedURLException;
 import java.net.ProxySelector;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
@@ -15,11 +19,13 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.AuthSchemes;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
@@ -30,6 +36,8 @@ import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
  * @author Chris
  */
 public class HttpClientConfigured {
+    private static final Log log = LogFactory.getLog(HttpClientConfigured.class);
+
     private final static int maxResponseTime = 20000; //0=infinite
     private HttpClient httpClient;
     private HttpClientContext httpContext;
@@ -110,7 +118,27 @@ public class HttpClientConfigured {
     public HttpResponse execute(HttpUriRequest method) throws IOException {
         return httpClient.execute(method, httpContext);
     }
+    
+    public void close() {
+        if (httpClient instanceof CloseableHttpResponse) {
+            try {
+                ((CloseableHttpClient)httpClient).close();
+            } catch (IOException ex) {
+                log.info("Error closing HttpClient: " + ex.getLocalizedMessage());
+            }
+        }
+    }
    
+    public void close(HttpResponse response) {
+        if (response instanceof CloseableHttpResponse &&
+                response != null) {
+            try {
+                ((CloseableHttpResponse)response).close();
+            } catch (IOException ex) {
+                log.info("Error closing HttpResponse: " + ex.getLocalizedMessage());
+            }
+        }
+    }
     /**
      * @return the httpClient
      */
