@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.ProxySelector;
 import java.net.URL;
 import java.util.Arrays;
+import javax.net.ssl.SSLContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHost;
@@ -20,6 +21,9 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContexts;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
@@ -37,6 +41,8 @@ public class HttpClientConfigured {
     private static final Log log = LogFactory.getLog(HttpClientConfigured.class);
 
     private static int maxResponseTime = 20000; //0=infinite
+    private static boolean allowSelfSignedCerts = true;
+    
     private HttpClient httpClient;
     private HttpClientContext httpContext;
 
@@ -68,6 +74,22 @@ public class HttpClientConfigured {
         
         HttpClientBuilder hcb = HttpClients.custom()
                 .setDefaultRequestConfig(defaultRequestConfig);
+        
+        if (allowSelfSignedCerts) {
+            //accept selfsigned certificates
+            try {
+                SSLContext sslcontext = SSLContexts.custom()
+                        .loadTrustMaterial(null, new TrustSelfSignedStrategy())
+                        .build();
+                SSLConnectionSocketFactory sslsf
+                        = new SSLConnectionSocketFactory(sslcontext,
+                                SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+                hcb.setSSLSocketFactory(sslsf);
+                log.info("SSL init for selfsigned certs successful.");
+            } catch (Exception ex) {
+                log.info("SSL init for selfsigned certs failed: " + ex.getLocalizedMessage());
+            }
+        }
 
         HttpClientContext context = HttpClientContext.create();
         if (username != null && password != null) {
@@ -171,6 +193,13 @@ public class HttpClientConfigured {
      */
     public static void setMaxResponseTime(int aMaxResponseTime) {
         maxResponseTime = aMaxResponseTime;
+    }
+
+    /**
+     * @param allowSelfSignedCerts the allowSelfSignedCerts to set
+     */
+    public static void setAllowSelfSignedCerts(boolean assc) {
+        allowSelfSignedCerts = assc;
     }
 
 }
