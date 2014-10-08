@@ -5,8 +5,6 @@ import java.net.MalformedURLException;
 import java.net.ProxySelector;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHost;
@@ -38,7 +36,7 @@ import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 public class HttpClientConfigured {
     private static final Log log = LogFactory.getLog(HttpClientConfigured.class);
 
-    private final static int maxResponseTime = 20000; //0=infinite
+    private static int maxResponseTime = 20000; //0=infinite
     private HttpClient httpClient;
     private HttpClientContext httpContext;
 
@@ -166,4 +164,13 @@ public class HttpClientConfigured {
     public void setContext(HttpClientContext context) {
         this.httpContext = context;
     }
+    
+    
+    /**
+     * @param aMaxResponseTime the maxResponseTime to set
+     */
+    public static void setMaxResponseTime(int aMaxResponseTime) {
+        maxResponseTime = aMaxResponseTime;
+    }
+
 }
