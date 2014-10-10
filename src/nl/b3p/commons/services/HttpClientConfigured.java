@@ -41,7 +41,7 @@ public class HttpClientConfigured {
     private static final Log log = LogFactory.getLog(HttpClientConfigured.class);
 
     private static int maxResponseTime = 20000; //0=infinite
-    private static boolean allowSelfSignedCerts = true;
+    private static boolean allowSelfSignedCerts = false; // see at use
     
     private HttpClient httpClient;
     private HttpClientContext httpContext;
@@ -77,6 +77,10 @@ public class HttpClientConfigured {
         
         if (allowSelfSignedCerts) {
             //accept selfsigned certificates
+            //TODO: This appears to be NOT working, not sure why!
+            //The only way to get this to work is to add the SSL certificate
+            //of de server (tomcat) with the correct domain name to the 
+            //TrustedStore of the JVM in which this app runs.
             try {
                 SSLContext sslcontext = SSLContexts.custom()
                         .loadTrustMaterial(null, new TrustSelfSignedStrategy())
