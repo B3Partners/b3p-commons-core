@@ -144,7 +144,7 @@ public class HttpClientConfigured {
     }
     
     public void close() {
-        if (httpClient instanceof CloseableHttpResponse) {
+        if (httpClient instanceof CloseableHttpClient) {
             try {
                 ((CloseableHttpClient)httpClient).close();
             } catch (IOException ex) {
@@ -154,8 +154,7 @@ public class HttpClientConfigured {
     }
    
     public void close(HttpResponse response) {
-        if (response instanceof CloseableHttpResponse &&
-                response != null) {
+        if (response instanceof CloseableHttpResponse) {
             try {
                 ((CloseableHttpResponse)response).close();
             } catch (IOException ex) {
