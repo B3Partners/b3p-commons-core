@@ -127,6 +127,10 @@ public class HttpClientConfigured {
                 // Add AuthCache to the execution context
                 context.setCredentialsProvider(credentialsProvider);
                 context.setAuthCache(authCache);
+                log.debug("Preemptive credentials: hostname: " + hostname
+                        + ", port: " + port
+                        + ", username: " + username
+                        + ", password: ****.");
             }
 
         }
