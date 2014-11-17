@@ -118,7 +118,8 @@ public class HttpClientConfigured {
 
             hcb = hcb.setDefaultCredentialsProvider(credentialsProvider);
             
-            if (preemptive) {
+            //preemptive not possible without hostname
+            if (preemptive && hostname!=null) {
                 // Create AuthCache instance for preemptive authentication
                 AuthCache authCache = new BasicAuthCache();
                 BasicScheme basicAuth = new BasicScheme();
