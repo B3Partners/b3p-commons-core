@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
@@ -52,7 +53,6 @@ public class FileManagerServlet extends HttpServlet {
         HTTP, FILE
     }
     protected String locationPrefix;
-    protected String servletPath;
     protected String fileParam;
     protected int directoryKeepDepth;
     protected FetchMethod fetchMethod;
@@ -60,7 +60,7 @@ public class FileManagerServlet extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
 
-        String dd = getConfigValue(config, "directoryKeepDepth", "-1");
+        String dd = getConfigValue(config, "directoryKeepDepth", "1");
         try {
             directoryKeepDepth = Integer.parseInt(dd);
         } catch (NumberFormatException nfe) {
@@ -73,7 +73,6 @@ public class FileManagerServlet extends HttpServlet {
         } else {
             fetchMethod = FetchMethod.FILE;
         }
-        servletPath = getConfigValue(config, "servletPath", "/files/");
         fileParam = getConfigValue(config, "fileParam", "filename");
 
     }
@@ -93,6 +92,24 @@ public class FileManagerServlet extends HttpServlet {
             return fileName.substring(dirSepPos + 1);
         } else {
             return fileName;
+        }
+    }
+    
+    private static String extractFullPath(String fileName) {
+        int dirSepPos = Math.max(fileName.lastIndexOf('\\'), fileName.lastIndexOf('/'));
+        if (dirSepPos != -1) {
+            return fileName.substring(1, dirSepPos);
+        } else {
+            return "";
+        }
+    }
+    
+    private String reformatServletPath(String path) {
+        int dirSepPos = Math.max(path.lastIndexOf('\\'), path.lastIndexOf('/'));
+        if (dirSepPos == path.length() && dirSepPos > 1) {
+            return path.substring(1, dirSepPos -1);
+        } else {
+            return path;
         }
     }
 
@@ -152,7 +169,9 @@ public class FileManagerServlet extends HttpServlet {
             
             if (workspace != null && in != null) {
                 fileName = reformatFilename(workspace);
-                FileOutputStream out = new FileOutputStream(new File(locationPrefix + fileName), false);
+                File dir = new File(extractFullPath(locationPrefix + fileName));
+                FileUtils.forceMkdir(dir);
+                FileOutputStream out = new FileOutputStream(locationPrefix + fileName, false);
                 try {
                     StreamCopy.copy(in, out);
                 } finally {
@@ -160,9 +179,9 @@ public class FileManagerServlet extends HttpServlet {
                     out.close();
                 }
 
-                /* return fetch url */
+                // return fetch url
                 String base = createBaseUrl(request);
-                String url = base + servletPath + fileName;
+                String url = base + reformatServletPath(request.getServletPath()) + fileName;
 
                 response.getWriter().write(url);
             }
