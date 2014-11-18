@@ -73,7 +73,7 @@ public class FileManagerServlet extends HttpServlet {
         } else {
             fetchMethod = FetchMethod.FILE;
         }
-        servletPath = getConfigValue(config, "servletPath", "/api/");
+        servletPath = getConfigValue(config, "servletPath", "/files/");
         fileParam = getConfigValue(config, "fileParam", "filename");
 
     }
