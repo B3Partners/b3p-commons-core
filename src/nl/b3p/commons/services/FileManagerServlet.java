@@ -14,7 +14,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import nl.b3p.commons.services.StreamCopy;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -44,6 +43,8 @@ public class FileManagerServlet extends HttpServlet {
     private static final int port = -1;
     private static final int RTIMEOUT = 20000;
     private static final String DEFAULT_MIME_TYPE = "application/octet-stream";
+    private static final String PARENT_PATH = "..";
+
     private static Log log = LogFactory.getLog(FileManagerServlet.class);
 
     protected static enum FetchMethod {
@@ -120,7 +121,7 @@ public class FileManagerServlet extends HttpServlet {
         return transformedFilename;
     }
     
-    protected boolean checkPostLogin(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    protected void checkPostLogin(HttpServletRequest request, HttpServletResponse response) throws Exception {
         throw new Exception("Post not allowed");
     }
     
@@ -128,6 +129,9 @@ public class FileManagerServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String fileName = null;
         try {
+            if (fetchMethod.equals(FetchMethod.HTTP)) {
+                throw new Exception("POST niet toegestaan bij instelling: '" + FetchMethod.HTTP + "'.");
+            }
             // voor POST moet wel zijn ingelogd
             checkPostLogin(request, response);
 
@@ -175,13 +179,16 @@ public class FileManagerServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        String uri = request.getPathInfo();
-        String fileName = transformFilename(uri);
-
-        log.debug("Uri: " + uri);
-        log.debug("Filename: " + fileName);
-
+        String fileName = null;
         try {
+            String uri = request.getPathInfo();
+            if (uri.contains(PARENT_PATH)) {
+                throw new Exception(PARENT_PATH + " niet toegestaan in url.");
+            }
+            fileName = transformFilename(uri);
+
+            log.debug("Uri: " + uri);
+            log.debug("Filename: " + fileName);
             checkGetLogin(request, response);
 
             switch (fetchMethod) {
