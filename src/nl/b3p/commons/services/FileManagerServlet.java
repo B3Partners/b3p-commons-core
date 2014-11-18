@@ -98,7 +98,7 @@ public class FileManagerServlet extends HttpServlet {
     private static String extractFullPath(String fileName) {
         int dirSepPos = Math.max(fileName.lastIndexOf('\\'), fileName.lastIndexOf('/'));
         if (dirSepPos != -1) {
-            return fileName.substring(1, dirSepPos);
+            return fileName.substring(0, dirSepPos);
         } else {
             return "";
         }
@@ -107,7 +107,7 @@ public class FileManagerServlet extends HttpServlet {
     private String reformatServletPath(String path) {
         int dirSepPos = Math.max(path.lastIndexOf('\\'), path.lastIndexOf('/'));
         if (dirSepPos == path.length() && dirSepPos > 1) {
-            return path.substring(1, dirSepPos -1);
+            return path.substring(0, dirSepPos -1);
         } else {
             return path;
         }
