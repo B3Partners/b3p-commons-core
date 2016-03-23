@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>nl.b3p</groupId>
     <artifactId>b3p-commons-core</artifactId>
-    <version>4.2.2-SNAPSHOT</version>
+    <version>4.2.2</version>
     <packaging>jar</packaging>
     
     <properties>
@@ -111,7 +111,7 @@
         <connection>scm:git:git@github.com:B3Partners/b3p-commons-core.git</connection>
         <developerConnection>scm:git:git@github.com:B3Partners/b3p-commons-core.git</developerConnection>
         <url>https://github.com/B3Partners/b3p-commons-core</url>
-        <tag>b3p-commons-core-${project.version}</tag>
+        <tag>b3p-commons-core-4.2.2</tag>
     </scm>
     <distributionManagement>
         <repository>
