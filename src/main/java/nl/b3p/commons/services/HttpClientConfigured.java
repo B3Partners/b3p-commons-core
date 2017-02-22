@@ -99,11 +99,13 @@ public class HttpClientConfigured {
         if (username != null && password != null) {
             String hostname = null; //any
             int port = -1; //any
+            String scheme = "http"; //default
             URL aURL;
             try {
                 aURL = new URL(url);
                 hostname = aURL.getHost();
                 port = aURL.getPort();
+                scheme = aURL.getProtocol();
             } catch (MalformedURLException ex) {
                 // ignore
             }
@@ -123,7 +125,7 @@ public class HttpClientConfigured {
                 // Create AuthCache instance for preemptive authentication
                 AuthCache authCache = new BasicAuthCache();
                 BasicScheme basicAuth = new BasicScheme();
-                HttpHost targetHost = new HttpHost(hostname, port);
+                HttpHost targetHost = new HttpHost(hostname, port, scheme);
                 authCache.put(targetHost, basicAuth);
                 // Add AuthCache to the execution context
                 context.setCredentialsProvider(credentialsProvider);
