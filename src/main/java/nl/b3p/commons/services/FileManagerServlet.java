@@ -56,6 +56,7 @@ public class FileManagerServlet extends HttpServlet {
     protected String fileParam;
     protected int directoryKeepDepth;
     protected FetchMethod fetchMethod;
+    protected String displayMethod;
 
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
@@ -73,6 +74,16 @@ public class FileManagerServlet extends HttpServlet {
         } else {
             fetchMethod = FetchMethod.FILE;
         }
+
+        String displayType = getConfigValue(config, "display", "HTTP");
+
+        if (displayType.equalsIgnoreCase("inline")) {
+            displayMethod = "inline";
+
+        } else {
+            displayMethod = "download";
+        }
+
         fileParam = getConfigValue(config, "fileParam", "filename");
 
     }
@@ -266,7 +277,7 @@ public class FileManagerServlet extends HttpServlet {
             input = new FileInputStream(file);
 
             response.setContentType(contentType);
-            response.addHeader("Content-Disposition", "attachment; filename=" + headerFileName);
+            response.addHeader("Content-Disposition", displayMethod + "; filename=" + headerFileName);
 
             try {
                 OutputStream output = response.getOutputStream();
