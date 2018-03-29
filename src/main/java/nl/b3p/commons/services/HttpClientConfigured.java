@@ -42,6 +42,7 @@ public class HttpClientConfigured {
 
     private static int maxResponseTime = 20000; //0=infinite
     private static boolean allowSelfSignedCerts = false; // see at use
+    private static boolean preemptive = false;
     
     private HttpClient httpClient;
     private HttpClientContext httpContext;
@@ -57,7 +58,7 @@ public class HttpClientConfigured {
         String username = null;
         String password = null;
         String url = null;
-        boolean preemptive = false;
+        
         if (credentials != null) {
             password = credentials.getPassword();
             username = credentials.getUserName();
@@ -132,6 +133,7 @@ public class HttpClientConfigured {
                 context.setAuthCache(authCache);
                 log.debug("Preemptive credentials: hostname: " + hostname
                         + ", port: " + port
+                        + ", proto: " + scheme
                         + ", username: " + username
                         + ", password: ****.");
             }
@@ -210,6 +212,13 @@ public class HttpClientConfigured {
      */
     public static void setAllowSelfSignedCerts(boolean assc) {
         allowSelfSignedCerts = assc;
+    }
+
+    /**
+     * @param aPreemptive the preemptive to set
+     */
+    public static void setPreemptive(boolean aPreemptive) {
+        preemptive = aPreemptive;
     }
 
 }
