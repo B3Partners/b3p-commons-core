@@ -58,7 +58,7 @@
             <groupId>struts</groupId>
             <artifactId>struts</artifactId>
             <version>1.2.9</version>
-        </dependency>       
+        </dependency>
         <dependency>
             <groupId>net.sourceforge.stripes</groupId>
             <artifactId>stripes</artifactId>
@@ -137,10 +137,24 @@
             <url>https://repo.b3p.nl/nexus/repository/public/</url>
         </repository>
     </repositories>
-    <build>        
-        <plugins>            
-            <plugin>                
-                <artifactId>maven-release-plugin</artifactId>                
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.owasp</groupId>
+                    <artifactId>dependency-check-maven</artifactId>
+                    <version>5.1.1</version>
+                    <configuration>
+                        <skipSystemScope>true</skipSystemScope>
+                        <format>ALL</format>
+                        <suppressionFile>${project.basedir}/.mvn/owasp-suppression.xml</suppressionFile>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <artifactId>maven-release-plugin</artifactId>
                 <version>2.5.3</version>
             </plugin>
             <plugin>
