@@ -13,7 +13,7 @@ timestamps {
     node {
         jdks.eachWithIndex { jdk, indexOfJdk ->
             final String jdkTestName = jdk.toString()
-            withEnv(["JAVA_HOME=${ tool 'JDK8' }", "PATH+MAVEN=${tool 'Maven CURRENT'}/bin:${env.JAVA_HOME}/bin"]) {
+            withEnv(["JAVA_HOME=${ tool jdkTestName }", "PATH+MAVEN=${tool 'Maven CURRENT'}/bin:${env.JAVA_HOME}/bin"]) {
 
                 stage('Prepare') {
                     checkout scm
