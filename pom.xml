@@ -24,7 +24,7 @@
     </issueManagement>
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>nl.b3p</groupId>
             <artifactId>securityfilter-b3p</artifactId>
             <version>5.0.1</version>
         </dependency>
