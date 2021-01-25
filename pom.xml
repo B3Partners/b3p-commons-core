@@ -11,7 +11,6 @@
         <maven.compiler.source>${project.build.sourceVersion}</maven.compiler.source>
         <maven.compiler.target>${project.build.targetVersion}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <netbeans.hint.jdkPlatform>JDK_${project.build.targetVersion}</netbeans.hint.jdkPlatform>
         <maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
     </properties>
     <organization>
@@ -68,14 +67,6 @@
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>fop</artifactId>
             <version>2.6</version>
-                <exclusions>
-                    <!-- fop-core comes with a load of deps we don't want 
-                     see also https://issues.apache.org/jira/browse/FOP-2889 -->
-                    <exclusion>
-                        <groupId>javax.servlet</groupId>
-                        <artifactId>servlet-api</artifactId>
-                    </exclusion>
-                </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
