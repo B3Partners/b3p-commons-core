@@ -29,13 +29,11 @@
  */
 package nl.b3p.commons.services;
 
-import org.apache.commons.lang.exception.*;
-
 /**
  *
  * @author Chris
  */
-public class B3pCommonsException extends NestableException {
+public class B3pCommonsException extends Exception {
 
     /**
      * Creates a new instance of B3pCommonsException 
